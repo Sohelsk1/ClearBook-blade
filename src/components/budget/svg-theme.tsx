@@ -4,16 +4,16 @@ export function SvgTheme() {
     <svg className="app-svg-theme" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <defs>
         <radialGradient id="cb-wash-green" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#6d9a86" stopOpacity="0.22" />
-          <stop offset="100%" stopColor="#6d9a86" stopOpacity="0" />
+          <stop offset="0%" stopColor="#10B981" stopOpacity="0.42" />
+          <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
         </radialGradient>
         <radialGradient id="cb-wash-blue" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#6d8aa8" stopOpacity="0.16" />
-          <stop offset="100%" stopColor="#6d8aa8" stopOpacity="0" />
+          <stop offset="0%" stopColor="#2563EB" stopOpacity="0.28" />
+          <stop offset="100%" stopColor="#2563EB" stopOpacity="0" />
         </radialGradient>
         <radialGradient id="cb-wash-amber" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#b39668" stopOpacity="0.14" />
-          <stop offset="100%" stopColor="#b39668" stopOpacity="0" />
+          <stop offset="0%" stopColor="#D97706" stopOpacity="0.24" />
+          <stop offset="100%" stopColor="#D97706" stopOpacity="0" />
         </radialGradient>
         <pattern id="cb-dots" width="20" height="20" patternUnits="userSpaceOnUse">
           <circle cx="1" cy="1" r="0.9" fill="currentColor" />

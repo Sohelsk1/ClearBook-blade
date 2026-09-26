@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { scoreRating } from "@/lib/budget/credit-report";
 
 const STOPS = [
-  { until: 549, color: "#c17d88" },
-  { until: 649, color: "#c4926a" },
-  { until: 749, color: "#b39668" },
-  { until: 799, color: "#7d9a78" },
-  { until: 900, color: "#6d9a86" },
+  { until: 549, color: "#EF4444" },
+  { until: 649, color: "#F97316" },
+  { until: 749, color: "#EAB308" },
+  { until: 799, color: "#22C55E" },
+  { until: 900, color: "#10B981" },
 ];
 
 function point(score: number, radius: number) {
