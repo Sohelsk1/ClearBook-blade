@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent } from "react";
 import { FileUp } from "lucide-react";
+import { ResetDataButton } from "@/components/budget/reset-data-button";
 import { formatDay, type Transaction } from "@/lib/budget/model";
 import { importStatementTransactions, loadLedger } from "@/lib/budget/ledger";
 import { ledgerRequestSignal, useBudget } from "@/lib/budget/store";
@@ -77,11 +78,14 @@ export function StatementImport() {
             Upload a bank statement PDF. The actual transaction date range is detected automatically. Duplicates are skipped. The file is used to import transactions; ClearBook does not need you to manually choose a month.
           </p>
         </div>
-        <label className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-emerald-500/50 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-400 transition-colors duration-200 hover:border-emerald-400 hover:bg-emerald-500/20 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-emerald-400">
-          <FileUp className="size-4" aria-hidden="true" />
-          {busy ? "Importing…" : "Choose PDF"}
-          <input className="sr-only" type="file" accept="application/pdf,.pdf" disabled={busy} onChange={onUpload} aria-label="Choose bank statement PDF" />
-        </label>
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-emerald-500/50 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-400 transition-colors duration-200 hover:border-emerald-400 hover:bg-emerald-500/20 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-emerald-400">
+            <FileUp className="size-4" aria-hidden="true" />
+            {busy ? "Importing…" : "Choose PDF"}
+            <input className="sr-only" type="file" accept="application/pdf,.pdf" disabled={busy} onChange={onUpload} aria-label="Choose bank statement PDF" />
+          </label>
+          <ResetDataButton />
+        </div>
       </div>
       {message && <p className="mt-3 rounded-lg bg-muted/40 px-3 py-2 text-sm" role="status" aria-live="polite">{message}</p>}
     </div>
