@@ -81,4 +81,7 @@ export function TransactionCalendar({ transactions, currency, viewMonth }: {
           </ul> : <p className="mt-5 text-sm text-muted-foreground">No transactions recorded for this date.</p>}
         </Modal>
       )}
+    </section>
+  );
+}
 
