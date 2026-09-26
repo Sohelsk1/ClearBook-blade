@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { Donut3D } from "@/components/budget/donut-3d";
 import { formatCompactMoney, formatDay, formatMoney, type CurrencyCode, type DaySpend, type SpendSlice } from "@/lib/budget/model";
 
 export type ChartSlice = SpendSlice & { fill: string };
@@ -31,22 +30,45 @@ function DarkTip({ active, label, value }: { active?: boolean; label?: string; v
 
 export function SpendChart({ slices, total, currency, onSelect }: SpendChartProps) {
   const reduceMotion = prefersReducedMotion();
-  const [flat, setFlat] = useState(reduceMotion);
 
-  if (!flat) {
-    return (
-      <div className="chart-surface">
-        <div className="relative h-[300px] w-full">
-          <Donut3D slices={slices} onSelect={onSelect} onUnavailable={() => setFlat(true)} />
-          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-16 text-center">
-            <span className="text-xs text-muted-foreground">Spent</span>
-            <span className="figure-center text-foreground">{formatMoney(total, currency)}</span>
-          </div>
+
+  return (
+    <div className="chart-surface">
+      <div className="relative mx-auto h-[300px] w-full max-w-[520px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={slices}
+              dataKey="cents"
+              nameKey="label"
+              innerRadius="64%"
+              outerRadius="82%"
+              paddingAngle={slices.length > 1 ? 3 : 0}
+              stroke="var(--color-card)"
+              strokeWidth={2}
+              isAnimationActive={!reduceMotion}
+              animationDuration={700}
+              animationEasing="ease-out"
+              onClick={(slice) => {
+                const id = (slice as { categoryId?: string }).categoryId;
+                if (id && id !== "other") onSelect?.(id);
+              }}
+            >
+              {slices.map((slice) => <Cell key={slice.categoryId} fill={slice.fill} />)}
+            </Pie>
+            <Tooltip content={({ active, payload }) => {
+              const row = payload?.[0]?.payload as ChartSlice | undefined;
+              return <DarkTip active={active} label={row?.label} value={row ? formatMoney(row.cents, currency) : undefined} />;
+            }} />
+          </PieChart>
+        </ResponsiveContainer>
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-10 text-center">
+          <span className="text-xs text-muted-foreground">Spent</span>
+          <span className="figure-center text-foreground">{formatMoney(total, currency)}</span>
         </div>
       </div>
-    );
-  }
-
+    </div>
+  );
   return (
     <div className="chart-surface">
       <div className="relative h-[300px] w-full">
