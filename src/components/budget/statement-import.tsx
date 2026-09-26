@@ -90,7 +90,7 @@ export function StatementImport() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <label className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-emerald-500/50 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-400 transition-colors duration-200 hover:border-emerald-400 hover:bg-emerald-500/20 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-emerald-400">
+          <label className="statement-pdf-button inline-flex cursor-pointer items-center justify-center gap-2 text-sm font-semibold transition-colors duration-200 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2">
             <FileUp className="size-4" aria-hidden="true" />
             {busy ? "Importing…" : "Choose PDF"}
             <input className="sr-only" type="file" accept="application/pdf,.pdf" disabled={busy} onChange={onUpload} aria-label="Choose bank statement PDF" />

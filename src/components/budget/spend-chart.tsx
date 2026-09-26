@@ -5,7 +5,7 @@ import { formatCompactMoney, formatDay, formatMoney, type CurrencyCode, type Day
 export type ChartSlice = SpendSlice & { fill: string };
 
 const ACCENT = "#6d8aa8";
-const CATEGORY_COLORS = ["#6d8aa8", "#b39668", "#6d9476", "#857aa6", "#b56d78", "#6a96a0"];
+const CATEGORY_COLORS = ["#2563eb", "#f59e0b", "#22c55e", "#7c3aed", "#ec4899", "#06b6d4"];
 const AXIS = { fill: "#71717A", fontSize: 12, fontFamily: "JetBrains Mono, ui-monospace, monospace" };
 
 type SpendChartProps = {
