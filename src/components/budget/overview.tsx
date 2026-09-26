@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState, type ComponentType, type ReactNod
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowDownLeft, ArrowUpRight, Landmark } from "lucide-react";
 import { StatementImport } from "@/components/budget/statement-import";
-import { MoneyRiskCard, MoneyRiskEmptyState } from "@/components/budget/money-risk";
 import { useEditor } from "@/components/budget/frame";
 import type { ChartSlice } from "@/components/budget/spend-chart";
 import {
@@ -271,33 +270,18 @@ export function Overview() {
         <p className="mt-1 text-sm text-muted-foreground">See where your money went during this statement period.</p>
       </div>
 {statementPeriod ? (
-        <>
-          <section className="mb-3 rounded-xl border border-border bg-card px-4 py-3" aria-labelledby="statement-period-heading">
-            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 id="statement-period-heading" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Statement period</h2>
-                <p className="mt-1 text-sm font-medium tabular-nums">{formatDay(bounds.start)} – {formatDay(bounds.end)}</p>
-              </div>
-              <p className="text-xs text-muted-foreground">{transactions.filter((tx) => tx.date >= bounds.start && tx.date <= bounds.end).length} transactions</p>
+        <section className="panel mb-4 p-4" aria-labelledby="statement-period-heading">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 id="statement-period-heading" className="text-sm font-medium">Statement period</h2>
+              <p className="mt-1 text-lg font-medium tabular-nums">{formatDay(bounds.start)} – {formatDay(bounds.end)}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{transactions.filter((tx) => tx.date >= bounds.start && tx.date <= bounds.end).length} transactions</p>
             </div>
-          </section>
-          <MoneyRiskCard
-            transactions={transactions}
-            start={bounds.start}
-            end={bounds.end}
-            currency={currency}
-            recurring={settings.recurring}
-            onUploadMore={() => document.getElementById("statement-import")?.scrollIntoView({ behavior: "smooth", block: "center" })}
-          />
-          <div className="mb-4">
             <StatementImport />
           </div>
-        </>
+        </section>
       ) : (
-        <>
-          <MoneyRiskEmptyState onUpload={() => document.getElementById("statement-import")?.scrollIntoView({ behavior: "smooth", block: "center" })} />
-          <StatementImport />
-        </>
+        <StatementImport />
       )}
       <div className="mb-4 max-w-md">
         <a href="/loans" className="panel flex items-center justify-between gap-3 p-4">
