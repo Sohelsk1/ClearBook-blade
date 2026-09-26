@@ -46,7 +46,7 @@ export function StatementImport() {
       const { rows: parsed, bank } = await extractStatement(file);
       const rows = parsed;
       if (!rows.length) throw new Error("No transactions were found in this statement.");
-      if (rows.length > 300) throw new Error("This month has more than 300 transactions; use a shorter statement.");
+      if (rows.length > 300) throw new Error("This statement has more than 300 transactions; use a shorter statement.");
       if (signal.aborted) return;
       const transactions = await Promise.all(rows.map((row) => asTransaction(row, bank)));
       const response = await importStatementTransactions({ data: { transactions }, signal });

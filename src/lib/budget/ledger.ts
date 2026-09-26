@@ -13,6 +13,7 @@ import {
   type Transaction,
 } from "@/lib/budget/model";
 import { classifyStatementText } from "./statement-categories";
+import { calendarJsonWithPeriod, periodFromCalendarJson } from "./statement-period";
 import type {
   BudgetLimit,
   CalendarPrefs,
@@ -379,12 +380,7 @@ async function readSnapshot(userId: string): Promise<LedgerSnapshot> {
     currency: parseCurrency(profile?.currency),
     settings,
     viewMonth: profile?.view_month && /^\d{4}-\d{2}$/.test(profile.view_month) ? profile.view_month : month,
-    statementPeriod: transactions.length
-      ? (() => {
-          const dates = transactions.map((tx) => tx.tx_date.slice(0, 10)).sort();
-          return { start: dates[0], end: dates[dates.length - 1] };
-        })()
-      : null,
+    statementPeriod: periodFromCalendarJson(profile?.calendar),
   };
 }
 
@@ -547,6 +543,10 @@ export const saveLedgerProfile = createServerFn({ method: "POST" })
   })
   .handler(async ({ context, data }) => {
     const sql = await db();
+    const existingProfile = await sql<{ calendar: string }>`
+      select calendar from ledger_profiles where user_id = ${context.userId}
+    `;
+    const statementPeriod = periodFromCalendarJson(existingProfile[0]?.calendar);
     await sql`
       insert into ledger_profiles (user_id, currency, theme, month_starts_on, card_order, budgets, recurring, calendar, view_month)
       values (
@@ -557,7 +557,7 @@ export const saveLedgerProfile = createServerFn({ method: "POST" })
         ${JSON.stringify(data.settings.cardOrder)},
         ${JSON.stringify(data.settings.budgets)},
         ${JSON.stringify(data.settings.recurring)},
-        ${JSON.stringify(data.settings.calendar)},
+        ${calendarJsonWithPeriod(data.settings.calendar, statementPeriod)},
         ${data.viewMonth}
       )
       on conflict (user_id) do update set
@@ -622,8 +622,26 @@ export const importStatementTransactions = createServerFn({ method: "POST" })
       if (inserted.length) { added++; if (tx.needsReview) needsReview++; seenIds.add(tx.id); if (key) seenReferences.add(key); }
       else skipped++;
     }
-    const dates = data.transactions.map((tx) => tx.date).sort();
-    return { added, skipped, needsReview, period: { start: dates[0], end: dates[dates.length - 1] }, snapshot: await readSnapshot(context.userId) };
+    const dates = data.transactions.map((tx) => tx.date).filter((date) => /^\d{4}-\d{2}-\d{2}$/.test(date)).sort();
+    const period = dates.length ? { start: dates[0], end: dates[dates.length - 1] } : null;
+    if (period) {
+      await readSnapshot(context.userId);
+      const profiles = await sql<{ calendar: string }>`
+        select calendar from ledger_profiles where user_id = ${context.userId}
+      `;
+      let stored: unknown = {};
+      try {
+        stored = JSON.parse(profiles[0]?.calendar || "{}");
+      } catch {
+        stored = {};
+      }
+      await sql`
+        update ledger_profiles
+        set calendar = ${calendarJsonWithPeriod(stored, period)}
+        where user_id = ${context.userId}
+      `;
+    }
+    return { added, skipped, needsReview, period, snapshot: await readSnapshot(context.userId) };
   });
 
 
