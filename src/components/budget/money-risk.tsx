@@ -7,7 +7,7 @@ type MoneyRiskProps = {
   start: string;
   end: string;
   currency: CurrencyCode;
-  recurring: RecurringItem[];
+  recurring: RecurringPayment[];
   onUploadMore: () => void;
 };
 
@@ -24,7 +24,7 @@ type RiskSummary = {
 
 const clamp = (value: number, min = 0, max = 100) => Math.max(min, Math.min(max, value));
 
-function summarize(transactions: Transaction[], start: string, end: string, recurring: RecurringItem[]): RiskSummary {
+function summarize(transactions: Transaction[], start: string, end: string, recurring: RecurringPayment[]): RiskSummary {
   let income = 0;
   let expense = 0;
   let savings = 0;
@@ -84,7 +84,7 @@ function previousRange(start: string, end: string) {
   return { start: previousStartDate.toISOString().slice(0, 10), end: previousEnd };
 }
 
-function scoreForRange(transactions: Transaction[], start: string, end: string, recurring: RecurringItem[]) {
+function scoreForRange(transactions: Transaction[], start: string, end: string, recurring: RecurringPayment[]) {
   return summarize(transactions, start, end, recurring).score;
 }
 
