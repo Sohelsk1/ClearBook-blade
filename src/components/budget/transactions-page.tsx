@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getRouteApi } from "@tanstack/react-router";
 import { createColumnHelper, flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
-import { ChevronDown, Copy, Pencil, Receipt, Trash2 } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, ChevronDown, Copy, Pencil, PiggyBank, Receipt, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { useEditor } from "@/components/budget/frame";
@@ -105,13 +105,14 @@ export function TransactionsPage() {
         const category = categoryById(tx.categoryId)?.label ?? "Transaction";
         const title = tx.merchant || tx.note || category;
         return (
-          <div className="min-w-0">
+          <div className="min-w-0 tx-passbook-details">
+            <div className="tx-passbook-line"><span className={`tx-passbook-icon ${tx.kind === "income" ? "is-in" : tx.kind === "expense" ? "is-out" : "is-save"}`}>{tx.kind === "income" ? <ArrowDownLeft className="size-4" /> : tx.kind === "expense" ? <ArrowUpRight className="size-4" /> : <PiggyBank className="size-4" />}</span>
             <p className="tx-counterparty">
               <span className={tx.kind === "income" ? "tx-direction is-in" : tx.kind === "expense" ? "tx-direction is-out" : "tx-direction is-save"}>
                 {tx.kind === "expense" ? "To" : tx.kind === "income" ? "From" : "Saved with"}
               </span>
               <span className="tx-counterparty-name">{tx.merchant || title}</span>
-            </p>
+            </p></div>
             {tx.note && tx.merchant ? <p className="tx-note">{tx.note}</p> : null}
           </div>
         );
@@ -242,10 +243,10 @@ export function TransactionsPage() {
       <p className="mt-1 text-sm font-medium">{statementPeriod ? "Statement period" : activeWindow.custom ? "Custom range" : periodLabel(viewMonth, settings.monthStartsOn)}</p>
       <p className="text-sm text-muted-foreground">{from && to ? `${formatDay(from)} – ${formatDay(to)}` : "Choose a start and end date."}</p>
       <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <Total label="Income" value={formatMoney(rangeSummary.income, currency)} />
-        <Total label="Expenses" value={formatMoney(rangeSummary.expense, currency)} />
-        <Total label="Saved" value={formatMoney(rangeSummary.savings, currency)} />
-        <Total label="Remaining" value={formatMoney(rangeSummary.remaining, currency)} />
+        <Total label="Income" value={formatMoney(rangeSummary.income, currency)} tone="income" />
+        <Total label="Expenses" value={formatMoney(rangeSummary.expense, currency)} tone="expense" />
+        <Total label="Saved" value={formatMoney(rangeSummary.savings, currency)} tone="savings" />
+        <Total label="Remaining" value={formatMoney(rangeSummary.remaining, currency)} tone="remaining" />
       </dl>
       <StatementImport />
       <label className="mt-4 grid gap-1 text-sm">
@@ -283,11 +284,20 @@ export function TransactionsPage() {
               const confirming = confirmId === tx.id;
               const tone = tx.kind === "income" ? "is-in" : tx.kind === "expense" ? "is-out" : "is-save";
               return (
-                <li key={tx.id} className="tx-card">
-                  <div className="min-w-0">
-                    <p className="truncate font-medium">{title}</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">{formatDay(tx.date)} · {category}{tx.needsReview ? <span className="tx-review">Needs review</span> : null}</p>
-                    {tx.merchant ? <p className="tx-card-note">{tx.kind === "expense" ? "To: " : tx.kind === "income" ? "From: " : ""}{tx.merchant}</p> : null}
+                <li key={tx.id} className={`tx-card tx-passbook-card ${tone}`}>
+                  <div className="tx-passbook-details">
+                    <div className="tx-passbook-line">
+                      <span className={`tx-passbook-icon ${tone}`}>{tx.kind === "income" ? <ArrowDownLeft className="size-4" /> : tx.kind === "expense" ? <ArrowUpRight className="size-4" /> : <PiggyBank className="size-4" />}</span>
+                      <div className="min-w-0">
+                        <p className="tx-counterparty">
+                          <span className={tx.kind === "income" ? "tx-direction is-in" : tx.kind === "expense" ? "tx-direction is-out" : "tx-direction is-save"}>
+                            {tx.kind === "expense" ? "To" : tx.kind === "income" ? "From" : "Saved with"}
+                          </span>
+                          <span className="tx-counterparty-name">{tx.merchant || title}</span>
+                        </p>
+                        <div className="tx-passbook-meta"><span>{formatDay(tx.date)}</span><span className="tx-category-chip" style={{ background: `${categoryColor(tx.categoryId)}18`, borderColor: `${categoryColor(tx.categoryId)}55`, color: categoryColor(tx.categoryId) }}><span className="tx-dot" style={{ background: categoryColor(tx.categoryId) }} aria-hidden="true" />{category}</span>{tx.needsReview ? <span className="tx-review">Needs review</span> : null}</div>
+                      </div>
+                    </div>
                     {tx.note && tx.merchant ? <p className="tx-card-note">{tx.note}</p> : null}
                   </div>
                   <div className="tx-card-side">
@@ -321,7 +331,7 @@ export function TransactionsPage() {
               </thead>
               <tbody>
                 {table.getRowModel().rows.map((row) => (
-                  <tr key={row.id}>
+                  <tr key={row.id} className={`tx-passbook-row ${row.original.kind === "income" ? "is-in" : row.original.kind === "expense" ? "is-out" : "is-save"}`}>
                     {row.getVisibleCells().map((cell) => (
                       <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
                     ))}
@@ -347,9 +357,9 @@ export function TransactionsPage() {
   );
 }
 
-function Total({ label, value }: { label: string; value: string }) {
+function Total({ label, value, tone }: { label: string; value: string; tone: "income" | "expense" | "savings" | "remaining" }) {
   return (
-    <div className="rounded-md bg-muted px-3 py-2">
+    <div className={`tx-total tx-total-${tone}`}>
       <dt className="text-xs text-muted-foreground">{label}</dt>
       <dd className="text-sm font-medium tabular-nums">{value}</dd>
     </div>
