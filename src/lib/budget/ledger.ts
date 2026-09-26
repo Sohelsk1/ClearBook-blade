@@ -622,7 +622,8 @@ export const importStatementTransactions = createServerFn({ method: "POST" })
       if (inserted.length) { added++; if (tx.needsReview) needsReview++; seenIds.add(tx.id); if (key) seenReferences.add(key); }
       else skipped++;
     }
-    return { added, skipped, needsReview, snapshot: await readSnapshot(context.userId) };
+    const dates = data.transactions.map((tx) => tx.date).sort();
+    return { added, skipped, needsReview, period: { start: dates[0], end: dates[dates.length - 1] }, snapshot: await readSnapshot(context.userId) };
   });
 
 
