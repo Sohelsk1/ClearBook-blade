@@ -172,7 +172,7 @@ function MonthPreview() {
           <div className="month-preview-visual">
             <div
               className="month-preview-ring"
-              style={{ background: `conic-gradient(#EF4444 0% ${Math.max(0, expenseShare - 1.2)}%, transparent ${Math.max(0, expenseShare - 1.2)}% ${expenseShare}%, #3B82F6 ${expenseShare}% ${expenseShare + Math.max(0, savingsShare - 1.2)}%, transparent ${expenseShare + Math.max(0, savingsShare - 1.2)}% ${expenseShare + savingsShare}%, #10B981 ${expenseShare + savingsShare}% 100%)` }}
+              style={{ background: `conic-gradient(#c17d88 0% ${Math.max(0, expenseShare - 1.2)}%, transparent ${Math.max(0, expenseShare - 1.2)}% ${expenseShare}%, #6d8aa8 ${expenseShare}% ${expenseShare + Math.max(0, savingsShare - 1.2)}%, transparent ${expenseShare + Math.max(0, savingsShare - 1.2)}% ${expenseShare + savingsShare}%, #6d9a86 ${expenseShare + savingsShare}% 100%)` }}
               role="img"
               aria-label={`Example allocation of ${money(income)} income: ${money(expenses)} expenses, ${money(savings)} savings, and ${money(remaining)} remaining`}
             >

@@ -50,7 +50,7 @@ export function PublicShell({ path, children }: { path: string; children: ReactN
           );
         })}
       </nav>
-      <main id="content" className="public-main">
+      <main id="content" className={path === "/" ? "public-main" : "public-main page-rise"}>
         {page && path !== "/" ? (
           <p className="public-crumb mt-6">
             <a href="/">Home</a>

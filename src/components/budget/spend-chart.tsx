@@ -4,8 +4,8 @@ import { formatCompactMoney, formatDay, formatMoney, type CurrencyCode, type Day
 
 export type ChartSlice = SpendSlice & { fill: string };
 
-const ACCENT = "#3B82F6";
-const CATEGORY_COLORS = ["#3B82F6", "#F59E0B", "#22C55E", "#8B5CF6", "#EC4899", "#06B6D4"];
+const ACCENT = "#6d8aa8";
+const CATEGORY_COLORS = ["#6d8aa8", "#b39668", "#6d9476", "#857aa6", "#b56d78", "#6a96a0"];
 const AXIS = { fill: "#71717A", fontSize: 12, fontFamily: "JetBrains Mono, ui-monospace, monospace" };
 
 type SpendChartProps = {
@@ -130,7 +130,7 @@ export function DailySpendChart({ points, currency, onSelect }: DailyProps) {
       <div className="h-[300px] w-full">
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={points} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
-            <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.04)" strokeDasharray="3 3" />
+            <CartesianGrid vertical={false} stroke="rgba(90,102,111,0.16)" strokeDasharray="3 3" />
             <XAxis dataKey="day" tick={AXIS} axisLine={false} tickLine={false} interval={6} />
             <YAxis width={52} tick={AXIS} axisLine={false} tickLine={false} tickFormatter={(value: number) => formatCompactMoney(value, currency)} />
             <Tooltip
@@ -167,7 +167,7 @@ export function DailySpendChart({ points, currency, onSelect }: DailyProps) {
               }}
             >
               {points.map((point, index) => (
-                <Cell key={point.date} fill={ACCENT} fillOpacity={hover === index ? 1 : 0.8} />
+                <Cell key={point.date} fill={ACCENT} fillOpacity={hover === index ? 0.92 : 0.62} />
               ))}
             </Bar>
           </BarChart>
@@ -176,16 +176,16 @@ export function DailySpendChart({ points, currency, onSelect }: DailyProps) {
       <p className="mt-3 min-h-10 text-sm" role="status">
         {active ? (
           <>
-            <span className="font-medium text-zinc-100">{formatDay(active.date)}</span>
-            <span className="text-zinc-400"> · </span>
-            <span className="font-semibold tabular-nums text-zinc-100">
+            <span className="font-medium text-foreground">{formatDay(active.date)}</span>
+            <span className="text-muted-foreground"> · </span>
+            <span className="font-semibold tabular-nums text-foreground">
               {active.cents > 0
                 ? `${formatMoney(active.cents, currency)} · ${active.count} transaction${active.count === 1 ? "" : "s"}`
                 : "No spending recorded"}
             </span>
           </>
         ) : (
-          <span className="text-zinc-400">Hover or tap a day.</span>
+          <span className="text-muted-foreground">Hover or tap a day.</span>
         )}
       </p>
     </div>
