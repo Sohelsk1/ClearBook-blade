@@ -125,11 +125,11 @@ export function FrameInner({ children, userId }: { children: ReactNode; userId: 
                 onChange={(event) => setCurrency(event.target.value as CurrencyCode)}>
                 {CURRENCIES.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}
               </select>
-              <div className="app-month-switch">
+              {pathname !== "/dashboard" ? <div className="app-month-switch">
                 <Button variant="ghost" size="icon" aria-label="Previous month" onClick={() => setViewMonth(shiftMonth(viewMonth, -1))}><ChevronLeft className="size-4" /></Button>
                 <p className="app-month-label">{label}</p>
                 <Button variant="ghost" size="icon" aria-label="Next month" onClick={() => setViewMonth(shiftMonth(viewMonth, 1))}><ChevronRight className="size-4" /></Button>
-              </div>
+              </div> : null}
               <Button className="app-add-button" onClick={api.openCreate}><Plus className="size-4" /> <span className="app-add-label">Add transaction</span></Button>
               <div className="app-mobile-user"><UserButton /></div>
             </div>

@@ -52,6 +52,7 @@ export type LedgerSnapshot = {
   currency: CurrencyCode;
   settings: Settings;
   viewMonth: string;
+  statementPeriod: { start: string; end: string } | null;
 };
 
 const KINDS = new Set<Kind>(["income", "expense", "savings"]);
@@ -378,6 +379,12 @@ async function readSnapshot(userId: string): Promise<LedgerSnapshot> {
     currency: parseCurrency(profile?.currency),
     settings,
     viewMonth: profile?.view_month && /^\d{4}-\d{2}$/.test(profile.view_month) ? profile.view_month : month,
+    statementPeriod: transactions.length
+      ? (() => {
+          const dates = transactions.map((tx) => tx.tx_date.slice(0, 10)).sort();
+          return { start: dates[0], end: dates[dates.length - 1] };
+        })()
+      : null,
   };
 }
 
@@ -577,17 +584,15 @@ export const importStatementTransactions = createServerFn({ method: "POST" })
   .validator((input: unknown) => {
     const row = asRecord(input);
     if (!row) throw new Error("Invalid statement");
-    const month = row.month;
-    if (typeof month !== "string" || !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) throw new Error("Invalid month");
     if (!Array.isArray(row.transactions) || row.transactions.length === 0 || row.transactions.length > 300) throw new Error("Invalid statement size");
     const transactions = row.transactions.map((value: unknown) => {
       const tx = parseTransaction(value);
-      if (!tx || !tx.id.startsWith("stmt-idfc-") || tx.date.slice(0, 7) !== month || tx.kind === "savings" || tx.goalId) throw new Error("Invalid statement row");
+      if (!tx || !tx.id.startsWith("stmt-idfc-") || tx.kind === "savings" || tx.goalId) throw new Error("Invalid statement row");
       if (tx.kind !== "income" && tx.kind !== "expense") throw new Error("Invalid statement row");
       const guess = classifyStatementText(tx.kind, `${tx.merchant ?? ""} ${tx.note}`);
       return { ...tx, categoryId: guess.categoryId, needsReview: guess.needsReview || tx.needsReview === true };
     });
-    return { month, transactions };
+    return { transactions };
   })
   .handler(async ({ context, data }) => {
     const sql = await db();
@@ -617,7 +622,8 @@ export const importStatementTransactions = createServerFn({ method: "POST" })
       if (inserted.length) { added++; if (tx.needsReview) needsReview++; seenIds.add(tx.id); if (key) seenReferences.add(key); }
       else skipped++;
     }
-    return { added, skipped, needsReview, snapshot: await readSnapshot(context.userId) };
+    const dates = data.transactions.map((tx) => tx.date).sort();
+    return { added, skipped, needsReview, period: { start: dates[0], end: dates[dates.length - 1] }, snapshot: await readSnapshot(context.userId) };
   });
 
 
