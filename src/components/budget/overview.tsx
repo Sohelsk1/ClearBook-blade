@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowDownLeft, ArrowUpRight, Landmark } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Download, Landmark } from "lucide-react";
 import { StatementImport } from "@/components/budget/statement-import";
+import { SaverScoreCard } from "@/components/budget/saver-score-card";
 import { useEditor } from "@/components/budget/frame";
 import type { ChartSlice } from "@/components/budget/spend-chart";
 import {
@@ -26,6 +27,7 @@ import {
 } from "@/lib/budget/model";
 import { categoryDeltas, comparePeriods, monthInReview, upcomingInPeriod, type ReviewFact } from "@/lib/budget/insights";
 import { useBudget, type OverviewCardId } from "@/lib/budget/store";
+import { downloadSpendReport } from "@/lib/budget/spend-report-pdf";
 
 function useCharts() {
   const [charts, setCharts] = useState<{
@@ -107,13 +109,11 @@ export function Overview() {
         className="dashboard-remaining lg:col-span-3" />
     ),
     stats: (
-      <section className="dashboard-stat-grid grid gap-3 sm:grid-cols-3 lg:col-span-9" aria-label="Income, expenses, and savings">
+      <section className="dashboard-stat-grid grid gap-3 sm:grid-cols-2 lg:col-span-9" aria-label="Income and expenses">
         <Stat label="Income" valueCents={summary.income} comparableCents={compare.current.income} previousCents={compare.previous.income}
           previousRecords={compare.previousRecords} currency={currency} tone="text-positive" icon={ArrowDownLeft} series={trends.income} />
         <Stat label="Expenses" valueCents={summary.expense} comparableCents={compare.current.expense} previousCents={compare.previous.expense}
           previousRecords={compare.previousRecords} currency={currency} tone="text-negative" icon={ArrowUpRight} series={trends.expense} />
-        <Stat label="Savings" valueCents={summary.savings} comparableCents={compare.current.savings} previousCents={compare.previous.savings}
-          previousRecords={compare.previousRecords} currency={currency} tone="text-savings" icon={Landmark} series={trends.savings} />
       </section>
     ),
     rhythm: (
@@ -283,6 +283,35 @@ export function Overview() {
       ) : (
         <StatementImport />
       )}
+      <SaverScoreCard
+        transactions={transactions}
+        start={bounds.start}
+        end={bounds.end}
+        currency={currency}
+        hasStatement={statementPeriod != null}
+      />
+      <button
+        type="button"
+        className="report-download mb-4"
+        onClick={() =>
+          downloadSpendReport({
+            periodLabel: `${formatDay(bounds.start)} - ${formatDay(bounds.end)}`,
+            currency,
+            transactions,
+            start: bounds.start,
+            end: bounds.end,
+            incomeCents: summary.income,
+            expenseCents: summary.expense,
+            categories: summary.spentByCategory.map((slice) => ({ label: slice.label, cents: slice.cents })),
+          })
+        }
+      >
+        <span>
+          <span className="block text-base font-semibold text-foreground">Download full report</span>
+          <span className="text-sm text-muted-foreground">Your score, spending, and tips in one PDF</span>
+        </span>
+        <span className="report-download-icon" aria-hidden="true"><Download className="size-5" /></span>
+      </button>
       <div className="mb-4 max-w-md">
         <a href="/loans" className="panel flex items-center justify-between gap-3 p-4">
           <span>
