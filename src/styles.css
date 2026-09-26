@@ -1401,6 +1401,15 @@ body:has(.public-shell-home),body:has(.auth-redesign){background:#0A0A0B}
 .tx-table th, .tx-table td { padding: .75rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
 .tx-table th { color: var(--muted-foreground); font-size: .75rem; font-weight: 500; }
 .tx-table tbody tr:last-child td { border-bottom: 0; }
+.tx-counterparty{display:flex;align-items:center;gap:.45rem;min-width:0;font-weight:700;line-height:1.35}
+.tx-counterparty-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tx-direction{display:inline-flex;align-items:center;border-radius:999px;padding:.12rem .48rem;font-size:.68rem;font-weight:800;letter-spacing:.02em;flex:none}
+.tx-direction.is-out{background:#fee2e2;color:#dc2626}
+.tx-direction.is-in{background:#dcfce7;color:#16a34a}
+.tx-direction.is-save{background:#fef3c7;color:#d97706}
+:root[data-theme="dark"] .tx-direction.is-out{background:rgb(244 63 94 / .16);color:#fb7185}
+:root[data-theme="dark"] .tx-direction.is-in{background:rgb(16 185 129 / .16);color:#34d399}
+:root[data-theme="dark"] .tx-direction.is-save{background:rgb(245 158 11 / .16);color:#fbbf24}
 .tx-note { margin-top: .2rem; color: var(--muted-foreground); font-size: .75rem; line-height: 1.4; white-space: normal; }
 .tx-cat { display: inline-flex; align-items: center; gap: .4rem; white-space: nowrap; }
 .tx-dot { width: .55rem; height: .55rem; border-radius: 999px; flex: none; }

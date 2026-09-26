@@ -5,6 +5,7 @@ import { formatCompactMoney, formatDay, formatMoney, type CurrencyCode, type Day
 export type ChartSlice = SpendSlice & { fill: string };
 
 const ACCENT = "#3B82F6";
+const CATEGORY_COLORS = ["#3B82F6", "#F59E0B", "#22C55E", "#8B5CF6", "#EC4899", "#06B6D4"];
 const AXIS = { fill: "#71717A", fontSize: 12, fontFamily: "JetBrains Mono, ui-monospace, monospace" };
 
 type SpendChartProps = {
@@ -54,7 +55,7 @@ export function SpendChart({ slices, total, currency, onSelect }: SpendChartProp
                 if (id && id !== "other") onSelect?.(id);
               }}
             >
-              {slices.map((slice) => <Cell key={slice.categoryId} fill={slice.fill} />)}
+              {slices.map((slice, index) => <Cell key={slice.categoryId} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />)}
             </Pie>
             <Tooltip content={({ active, payload }) => {
               const row = payload?.[0]?.payload as ChartSlice | undefined;
