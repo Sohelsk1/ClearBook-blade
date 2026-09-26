@@ -75,7 +75,7 @@ export function MonthNote({
       {next && !next.href ? (
         <Button className="mt-3" onClick={openCreate}>Add transaction</Button>
       ) : next ? null : (
-        <p className="mt-3 text-sm text-muted-foreground">Checklist done for this month. Open Insights to compare it with the last one.</p>
+        <p className="mt-3 text-sm text-muted-foreground">Checklist done for this month. Open Reports to compare it with the last one.</p>
       )}
     </section>
   );

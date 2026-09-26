@@ -89,7 +89,7 @@ export function SettingsPage() {
       </section>
       <section className="panel p-4">
         <h3 className="text-lg font-medium">Scheduled payments</h3>
-        {settings.recurring.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">None yet. Insights suggests a repeat after two months.</p> : null}
+        {settings.recurring.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">None yet. A repeat shows up in Reports after two months.</p> : null}
         <ul className="mt-2 space-y-2">
           {settings.recurring.map((item) => (
             <li key={item.id} className="flex items-center justify-between gap-3 text-sm">

@@ -20,10 +20,10 @@ import { Mark } from "@/components/budget/frame";
 import { SvgTheme } from "@/components/budget/svg-theme";
 
 const NAV = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, active: (path: string) => path === "/dashboard" },
-  { to: "/transactions", label: "Ledger", icon: List, active: (path: string) => path.startsWith("/transactions") },
-  { to: "/reports", label: "Insights", icon: ChartNoAxesCombined, active: (path: string) => path.startsWith("/reports") || path.startsWith("/insights") },
-  { to: "/goals", label: "Goals", icon: Target, active: (path: string) => path.startsWith("/goals") },
+  { to: "/dashboard", label: "Home", icon: LayoutDashboard, active: (path: string) => path === "/dashboard" },
+  { to: "/transactions", label: "Passbook", icon: List, active: (path: string) => path.startsWith("/transactions") },
+  { to: "/reports", label: "Reports", icon: ChartNoAxesCombined, active: (path: string) => path.startsWith("/reports") || path.startsWith("/insights") },
+  { to: "/goals", label: "Savings", icon: Target, active: (path: string) => path.startsWith("/goals") },
   { to: "/loans", label: "Loans", icon: Landmark, active: (path: string) => path.startsWith("/loans") },
   { to: "/settings", label: "Settings", icon: Settings, active: (path: string) => path.startsWith("/settings") },
 ] as const;

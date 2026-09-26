@@ -238,7 +238,7 @@ export function TransactionsPage() {
 
   return (
     <section aria-labelledby="tx-heading">
-      <h2 id="tx-heading" className="font-display text-3xl font-medium tracking-tight">Transactions</h2>
+      <h2 id="tx-heading" className="font-display text-3xl font-medium tracking-tight">Passbook</h2>
       <p className="mt-1 text-sm font-medium">{statementPeriod ? "Statement period" : activeWindow.custom ? "Custom range" : periodLabel(viewMonth, settings.monthStartsOn)}</p>
       <p className="text-sm text-muted-foreground">{from && to ? `${formatDay(from)} – ${formatDay(to)}` : "Choose a start and end date."}</p>
       <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">

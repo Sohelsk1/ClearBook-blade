@@ -133,7 +133,7 @@ export function Overview() {
         )}
         <FlowBar allocation={allocation} summary={summary} currency={currency} label={label} />
         <Link to="/reports" className="mt-2 inline-flex text-sm font-medium text-primary underline-offset-2 hover:underline">
-          Open Insights
+          Open Reports
         </Link>
       </section>
     ),
@@ -200,7 +200,7 @@ export function Overview() {
         <article className="panel p-4">
           <h2 className="text-sm text-muted-foreground">Upcoming Payments</h2>
           {upcoming.length === 0 ? (
-            <p className="mt-2 text-sm text-muted-foreground">No confirmed scheduled payments in this period. Confirm a repeat from Insights if you see one.</p>
+            <p className="mt-2 text-sm text-muted-foreground">No confirmed scheduled payments in this period. Confirm a repeat from Reports if you see one.</p>
           ) : (
             <ul className="mt-2 space-y-2 text-sm">
               {upcoming.slice(0, 3).map((item) => (

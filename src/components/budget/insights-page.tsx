@@ -51,7 +51,7 @@ export function InsightsPage() {
   return (
     <div className="grid gap-4">
       <header>
-        <h2 className="font-display text-3xl font-medium tracking-tight">Insights</h2>
+        <h2 className="font-display text-3xl font-medium tracking-tight">Reports</h2>
         <p className="mt-1 text-sm text-muted-foreground">What you recorded. Estimates are labeled.</p>
       </header>
 

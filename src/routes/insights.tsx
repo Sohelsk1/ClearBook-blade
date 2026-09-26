@@ -4,7 +4,7 @@ import { gateLocation } from "@/lib/session-gate";
 import { privatePageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/insights")({
-  head: () => privatePageHead("Insights"),
+  head: () => privatePageHead("Reports"),
   beforeLoad: ({ location }) => gateLocation(location.pathname),
   component: InsightsPage,
 });
