@@ -20,13 +20,14 @@ export function TransactionsPage() {
   const transactions = useBudget((state) => state.transactions);
   const currency = useBudget((state) => state.currency);
   const viewMonth = useBudget((state) => state.viewMonth);
+  const statementPeriod = useBudget((state) => state.statementPeriod);
   const settings = useBudget((state) => state.settings);
   const deleteTransaction = useBudget((state) => state.deleteTransaction);
   const duplicateTransaction = useBudget((state) => state.duplicateTransaction);
   const setDisplayRange = useBudget((state) => state.setDisplayRange);
   const { openEdit, openCreate } = useEditor();
-  const bounds = periodBounds(viewMonth, settings.monthStartsOn);
-  const periodKey = `${viewMonth}:${settings.monthStartsOn}`;
+  const bounds = statementPeriod ?? periodBounds(viewMonth, settings.monthStartsOn);
+  const periodKey = statementPeriod ? `${statementPeriod.start}:${statementPeriod.end}` : `${viewMonth}:${settings.monthStartsOn}`;
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [query, setQuery] = useState(search.q ?? "");
   const [kind, setKind] = useState<KindFilter>(search.kind ?? "all");
@@ -62,7 +63,7 @@ export function TransactionsPage() {
     setTo(bounds.end);
   }
 
-  const activeWindow = transactionWindow(viewMonth, settings.monthStartsOn, from, to);
+  const activeWindow = statementPeriod ? { from: bounds.start, to: bounds.end, custom: true } : transactionWindow(viewMonth, settings.monthStartsOn, from, to);
   const rangeSummary = useMemo(() => summarizeRange(transactions, from, to), [transactions, from, to]);
 
   useEffect(() => {
@@ -233,7 +234,7 @@ export function TransactionsPage() {
   return (
     <section aria-labelledby="tx-heading">
       <h2 id="tx-heading" className="font-display text-3xl font-medium tracking-tight">Transactions</h2>
-      <p className="mt-1 text-sm font-medium">{activeWindow.custom ? "Custom range" : periodLabel(viewMonth, settings.monthStartsOn)}</p>
+      <p className="mt-1 text-sm font-medium">{statementPeriod ? "Statement period" : activeWindow.custom ? "Custom range" : periodLabel(viewMonth, settings.monthStartsOn)}</p>
       <p className="text-sm text-muted-foreground">{from && to ? `${formatDay(from)} – ${formatDay(to)}` : "Choose a start and end date."}</p>
       <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <Total label="Income" value={formatMoney(rangeSummary.income, currency)} />
