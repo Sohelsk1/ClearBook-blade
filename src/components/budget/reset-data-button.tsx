@@ -42,7 +42,7 @@ export function ResetDataButton() {
 
   return (
     <>
-      <Button type="button" variant="outline" className="min-h-11 gap-2 text-negative" onClick={() => { setError(""); setConfirmReset(true); }} disabled={resetPending} aria-label="Reset all ClearBook data">
+      <Button type="button" variant="outline" className="reset-data-button gap-2" onClick={() => { setError(""); setConfirmReset(true); }} disabled={resetPending} aria-label="Reset all ClearBook data">
         <RotateCcw className="size-4" aria-hidden="true" />
         Reset
       </Button>
