@@ -305,6 +305,7 @@ export function Overview() {
             <span className="block text-sm font-medium">Credit score check</span>
             <span className="text-xs text-muted-foreground">PAN and date of birth, only with your consent</span>
           </span>
+          <Landmark className="size-4 text-muted-foreground" aria-hidden="true" />
         </a>
       </div>
       <div className="grid gap-4 lg:grid-cols-12">

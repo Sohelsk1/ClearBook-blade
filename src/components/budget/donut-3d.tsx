@@ -36,7 +36,7 @@ export function Donut3D({ slices, onSelect, onUnavailable }: Donut3DProps) {
     void import("three").then((THREE) => {
       if (stopped || !host.current) return;
       const width = host.current.clientWidth || 280;
-      const height = 250;
+      const height = 300;
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
       if (!renderer.getContext()) {
         renderer.dispose();
@@ -49,7 +49,7 @@ export function Donut3D({ slices, onSelect, onUnavailable }: Donut3DProps) {
 
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(32, width / height, 0.1, 50);
-      camera.position.set(0, 2.55, 2.95);
+      camera.position.set(0, 2.8, 2.8);
       camera.lookAt(0, 0, 0);
       scene.add(new THREE.AmbientLight(0xffffff, 0.72));
       const light = new THREE.DirectionalLight(0xffffff, 1.15);
@@ -153,5 +153,5 @@ export function Donut3D({ slices, onSelect, onUnavailable }: Donut3DProps) {
     };
   }, [signature]);
 
-  return <div ref={host} className="mx-auto h-[250px] w-full max-w-[430px]" />;
+  return <div ref={host} className="h-[300px] w-full" />;
 }

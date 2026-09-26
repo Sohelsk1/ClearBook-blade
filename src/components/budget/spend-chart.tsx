@@ -36,7 +36,7 @@ export function SpendChart({ slices, total, currency, onSelect }: SpendChartProp
   if (!flat) {
     return (
       <div className="chart-surface">
-        <div className="relative mx-auto h-[250px] w-full max-w-[430px]">
+        <div className="relative h-[300px] w-full">
           <Donut3D slices={slices} onSelect={onSelect} onUnavailable={() => setFlat(true)} />
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-16 text-center">
             <span className="text-xs text-muted-foreground">Spent</span>
@@ -49,8 +49,8 @@ export function SpendChart({ slices, total, currency, onSelect }: SpendChartProp
 
   return (
     <div className="chart-surface">
-      <div className="relative h-[250px] w-full">
-        <ResponsiveContainer width="100%" height={250}>
+      <div className="relative h-[300px] w-full">
+        <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
               data={slices}

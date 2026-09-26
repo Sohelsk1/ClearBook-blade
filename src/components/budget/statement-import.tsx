@@ -1,30 +1,17 @@
 import { useState, type ChangeEvent } from "react";
 import { FileUp } from "lucide-react";
-import { ResetDataButton } from "@/components/budget/reset-data-button";
 import { formatDay, type Transaction } from "@/lib/budget/model";
 import { importStatementTransactions, loadLedger } from "@/lib/budget/ledger";
 import { ledgerRequestSignal, useBudget } from "@/lib/budget/store";
 import { extractStatement, type StatementRow } from "@/lib/budget/statement-parser";
 import { classifyStatementText } from "@/lib/budget/statement-categories";
 
-function extractStatementCounterparty(description: string): string {
-  const parts = description.split("/").map((part) => part.trim()).filter(Boolean);
-  const rail = (parts[0] ?? "").toUpperCase();
-  if (rail === "UPI") {
-    // Common UPI narration: UPI/DR|CR/<sequence>/<counterparty>/...
-    return (parts[3] || parts[2] || "").slice(0, 60) || description.slice(0, 60);
-  }
-  if (["IMPS", "NEFT", "RTGS", "IFT"].includes(rail)) {
-    return (parts[2] || parts[1] || "").slice(0, 60) || description.slice(0, 60);
-  }
-  return (parts[2] || parts[1] || "").slice(0, 60) || description.slice(0, 60);
-}
-
 async function asTransaction(row: StatementRow, bank: string): Promise<Transaction> {
   const fingerprint = `${row.date}|${row.kind}|${row.amountCents}|${row.balanceCents}|${row.description}`;
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(fingerprint));
   const id = "stmt-idfc-" + [...new Uint8Array(digest)].slice(0, 16).map((byte) => byte.toString(16).padStart(2, "0")).join("");
-  const merchant = extractStatementCounterparty(row.description);
+  const parts = row.description.split("/");
+  const merchant = (parts[0].toUpperCase() === "UPI" ? parts[3] : parts[2])?.trim().slice(0, 60) || row.description.slice(0, 60);
   const guess = classifyStatementText(row.kind, `${merchant} ${row.description}`);
   return {
     id,
@@ -90,14 +77,11 @@ export function StatementImport() {
             Upload a bank statement PDF. The actual transaction date range is detected automatically. Duplicates are skipped. The file is used to import transactions; ClearBook does not need you to manually choose a month.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-emerald-500/50 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-400 transition-colors duration-200 hover:border-emerald-400 hover:bg-emerald-500/20 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-emerald-400">
-            <FileUp className="size-4" aria-hidden="true" />
-            {busy ? "Importing…" : "Choose PDF"}
-            <input className="sr-only" type="file" accept="application/pdf,.pdf" disabled={busy} onChange={onUpload} aria-label="Choose bank statement PDF" />
-          </label>
-          <ResetDataButton />
-        </div>
+        <label className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-emerald-500/50 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-400 transition-colors duration-200 hover:border-emerald-400 hover:bg-emerald-500/20 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-emerald-400">
+          <FileUp className="size-4" aria-hidden="true" />
+          {busy ? "Importing…" : "Choose PDF"}
+          <input className="sr-only" type="file" accept="application/pdf,.pdf" disabled={busy} onChange={onUpload} aria-label="Choose bank statement PDF" />
+        </label>
       </div>
       {message && <p className="mt-3 rounded-lg bg-muted/40 px-3 py-2 text-sm" role="status" aria-live="polite">{message}</p>}
     </div>

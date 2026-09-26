@@ -107,7 +107,6 @@ export function TransactionsPage() {
         return (
           <div className="min-w-0">
             <p className="truncate font-medium">{title}</p>
-            {tx.merchant ? <p className="tx-note">{tx.kind === "expense" ? "To: " : tx.kind === "income" ? "From: " : ""}{tx.merchant}</p> : null}
             {tx.note && tx.merchant ? <p className="tx-note">{tx.note}</p> : null}
           </div>
         );
@@ -283,7 +282,6 @@ export function TransactionsPage() {
                   <div className="min-w-0">
                     <p className="truncate font-medium">{title}</p>
                     <p className="mt-0.5 text-xs text-muted-foreground">{formatDay(tx.date)} · {category}{tx.needsReview ? <span className="tx-review">Needs review</span> : null}</p>
-                    {tx.merchant ? <p className="tx-card-note">{tx.kind === "expense" ? "To: " : tx.kind === "income" ? "From: " : ""}{tx.merchant}</p> : null}
                     {tx.note && tx.merchant ? <p className="tx-card-note">{tx.note}</p> : null}
                   </div>
                   <div className="tx-card-side">
