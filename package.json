@@ -7,8 +7,9 @@
     "nf3": "0.3.17"
   },
   "scripts": {
-    "dev": "node scripts/with-app-env.mjs vite dev --host 0.0.0.0 --port 8080",
+    "dev": "node scripts/with-app-env.mjs node emergent/dev.mjs",
     "build": "node scripts/with-app-env.mjs vite build && npm run db:migrate",
+    "build:site": "cd emergent/frontend && DISABLE_ESLINT_PLUGIN=true GENERATE_SOURCEMAP=false npm run build && cd /workspace && node scripts/copy-site-build.mjs",
     "db:migrate": "node scripts/migrate.mjs",
     "build:dev": "node scripts/with-app-env.mjs vite build --mode development",
     "preview": "node scripts/with-app-env.mjs vite preview",
