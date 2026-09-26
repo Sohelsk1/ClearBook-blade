@@ -295,7 +295,7 @@ export function TransactionsPage() {
                           </span>
                           <span className="tx-counterparty-name">{tx.merchant || title}</span>
                         </p>
-                        <div className="tx-passbook-meta"><span>{formatDay(tx.date)}</span><span className="tx-category-chip"><span className="tx-dot" style={{ background: categoryColor(tx.categoryId) }} aria-hidden="true" />{category}</span>{tx.needsReview ? <span className="tx-review">Needs review</span> : null}</div>
+                        <div className="tx-passbook-meta"><span>{formatDay(tx.date)}</span><span className="tx-category-chip" style={{ background: `${categoryColor(tx.categoryId)}18`, borderColor: `${categoryColor(tx.categoryId)}55`, color: categoryColor(tx.categoryId) }}><span className="tx-dot" style={{ background: categoryColor(tx.categoryId) }} aria-hidden="true" />{category}</span>{tx.needsReview ? <span className="tx-review">Needs review</span> : null}</div>
                       </div>
                     </div>
                     {tx.note && tx.merchant ? <p className="tx-card-note">{tx.note}</p> : null}
