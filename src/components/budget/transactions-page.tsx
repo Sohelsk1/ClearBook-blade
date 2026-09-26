@@ -106,8 +106,12 @@ export function TransactionsPage() {
         const title = tx.merchant || tx.note || category;
         return (
           <div className="min-w-0">
-            <p className="truncate font-medium">{title}</p>
-            {tx.merchant ? <p className="tx-note">{tx.kind === "expense" ? "To: " : tx.kind === "income" ? "From: " : ""}{tx.merchant}</p> : null}
+            <p className="tx-counterparty">
+              <span className={tx.kind === "income" ? "tx-direction is-in" : tx.kind === "expense" ? "tx-direction is-out" : "tx-direction is-save"}>
+                {tx.kind === "expense" ? "To" : tx.kind === "income" ? "From" : "Saved with"}
+              </span>
+              <span className="tx-counterparty-name">{tx.merchant || title}</span>
+            </p>
             {tx.note && tx.merchant ? <p className="tx-note">{tx.note}</p> : null}
           </div>
         );
