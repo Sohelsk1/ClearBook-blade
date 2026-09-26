@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChartNoAxesCombined, Download, PencilLine } from "lucide-react";
 import { PublicShell, ProseSection } from "@/components/budget/public-shell";
-import { HOME_DESCRIPTION, HOME_H1 } from "@/lib/seo";
+import { HeroUnderline, useHomeCinema } from "@/components/budget/home-stage";
+import { HOME_DESCRIPTION } from "@/lib/seo";
 
 const RECORD = [
   "Income, expenses, and money set aside, each with a category, date, note, and merchant.",
@@ -41,29 +42,27 @@ const START = [
 
 export function HomePage() {
   const motionScope = useRef<HTMLDivElement>(null);
+  useHomeCinema(motionScope);
 
   useEffect(() => {
-    let disposed = false;
-    let cleanup = () => {};
-    void Promise.all([import("gsap"), import("gsap/ScrollTrigger")]).then(([{ gsap }, { ScrollTrigger }]) => {
-      if (disposed || !motionScope.current) return;
-      gsap.registerPlugin(ScrollTrigger);
-      const media = gsap.matchMedia();
-      media.add("(prefers-reduced-motion: no-preference)", () => {
-        const context = gsap.context(() => {
-          gsap.from(".redesign-hero .hero-copy > *", { opacity: 0, y: 4, duration: 0.2, stagger: 0.06, ease: "power2.out" });
-          for (const selector of [".redesign-feature-section", ".home-steps"]) {
-            gsap.from(`${selector} .home-step-card`, {
-              opacity: 0, y: 4, duration: 0.2, stagger: 0.06, ease: "power2.out",
-              scrollTrigger: { trigger: selector, start: "top 85%", once: true },
-            });
-          }
-        }, motionScope);
-        return () => context.revert();
-      });
-      cleanup = () => media.revert();
-    }).catch(() => { /* Content remains visible if motion does not load. */ });
-    return () => { disposed = true; cleanup(); };
+    const root = motionScope.current;
+    if (!root) return;
+    const cards = root.querySelectorAll<HTMLElement>(".home-step-card");
+    cards.forEach((card) => {
+      card.style.removeProperty("opacity");
+      card.style.removeProperty("visibility");
+    });
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const targets = root.querySelectorAll<HTMLElement>(".home-step-card, .month-preview, .home-intro, .home-details > section, .home-final");
+    const seen = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.classList.add("reveal-in");
+        seen.unobserve(entry.target);
+      }
+    }, { rootMargin: "0px 0px -10% 0px", threshold: 0.15 });
+    targets.forEach((node) => seen.observe(node));
+    return () => seen.disconnect();
   }, []);
 
   return (
@@ -71,8 +70,8 @@ export function HomePage() {
       <div ref={motionScope} className="home-motion">
       <section className="hero hero-landing redesign-hero mt-8" aria-labelledby="home-headline">
         <div className="hero-copy">
-          <p className="redesign-eyebrow">A personal ledger, made for real life</p>
-          <h1 id="home-headline">{HOME_H1}</h1>
+          <p className="redesign-eyebrow hero-eyebrow"><span className="hero-mark-fallback" aria-hidden="true" /> A personal ledger, made for real life</p>
+          <h1 id="home-headline">Your money, <span className="hero-gradient">made clear.</span><HeroUnderline /></h1>
           <p className="redesign-hero-description">{HOME_DESCRIPTION} Start with manual entries, then see the month clearly.</p>
           <div className="hero-actions">
             <a href="/login" className="press redesign-primary">Create account <span aria-hidden="true">↗</span></a>
@@ -84,7 +83,9 @@ export function HomePage() {
           <div className="redesign-mock-top"><span>MONTHLY OVERVIEW</span><span>EXAMPLE DATA</span></div>
           <p>Remaining this month</p>
           <ExampleBalance />
-          <div className="redesign-mock-bars" aria-hidden="true"><span /><span /><span /><span /><span /><span /><span /><span /><span /></div>
+          <div className="redesign-mock-bars" aria-hidden="true">
+            {[78, 46, 88, 34, 62].map((width) => <span key={width} style={{ width: `${width}%` }} />)}
+          </div>
           <div className="redesign-mock-stats">
             <div><span>Income</span><strong>₹80,000</strong></div>
             <div><span>Expenses</span><strong>₹45,000</strong></div>
@@ -96,16 +97,16 @@ export function HomePage() {
       <section className="redesign-feature-section" aria-labelledby="redesign-features-heading">
         <div className="home-section-heading"><span className="home-section-number">01 / THE ESSENTIALS</span><h2 id="redesign-features-heading">Everything in one clear view.</h2></div>
         <div className="home-step-grid">
-          <article className="home-step-card"><PencilLine aria-hidden="true" /><h3>Record your way</h3><p>Add income, expenses, and savings on the dates they happened.</p></article>
-          <article className="home-step-card"><ChartNoAxesCombined aria-hidden="true" /><h3>Understand your month</h3><p>See categories, budgets, and what remains after the amounts you recorded.</p></article>
-          <article className="home-step-card"><Download aria-hidden="true" /><h3>Keep a copy</h3><p>Export your own ledger to Excel from Settings whenever you need it.</p></article>
+          <StepCard icon={<PencilLine aria-hidden="true" />} title="Record your way" text="Add income, expenses, and savings on the dates they happened." />
+          <StepCard icon={<ChartNoAxesCombined aria-hidden="true" />} title="Understand your month" text="See categories, budgets, and what remains after the amounts you recorded." />
+          <StepCard icon={<Download aria-hidden="true" />} title="Keep a copy" text="Export your own ledger to Excel from Settings whenever you need it." />
         </div>
       </section>
 
       <MonthPreview />
 
       <section className="home-intro" aria-labelledby="home-intro-title">
-        <span className="home-section-number" aria-hidden="true">01 / THE IDEA</span>
+        <span className="home-section-number" aria-hidden="true">02 / THE IDEA</span>
         <div>
           <h2 id="home-intro-title">A little more clarity. <em>A lot less guesswork.</em></h2>
           <p>Put your everyday money in one place. See what came in, what went out, and what you chose to set aside—without pretending the example below is your real bank balance.</p>
@@ -113,11 +114,11 @@ export function HomePage() {
       </section>
 
       <section className="home-steps" aria-labelledby="home-steps-title">
-        <div className="home-section-heading"><span className="home-section-number">02 / THE FLOW</span><h2 id="home-steps-title">Your month, in three moves.</h2></div>
+        <div className="home-section-heading"><span className="home-section-number">03 / THE FLOW</span><h2 id="home-steps-title">Your month, in three moves.</h2></div>
         <div className="home-step-grid">
-          <article className="home-step-card"><span>01</span><h3>Record it.</h3><p>Add income, expenses, and savings on the dates they happened.</p></article>
-          <article className="home-step-card"><span>02</span><h3>See it.</h3><p>Read the month you choose, with categories and a clear remaining sum.</p></article>
-          <article className="home-step-card"><span>03</span><h3>Make a plan.</h3><p>Set category budgets and savings goals that suit your own life.</p></article>
+          <StepCard kicker="01" title="Record it." text="Add income, expenses, and savings on the dates they happened." />
+          <StepCard kicker="02" title="See it." text="Read the month you choose, with categories and a clear remaining sum." />
+          <StepCard kicker="03" title="Make a plan." text="Set category budgets and savings goals that suit your own life." />
         </div>
       </section>
 
@@ -145,7 +146,7 @@ export function HomePage() {
       </ProseSection>
 
       <section className="home-directory mt-10">
-        <span className="home-section-number">03 / EXPLORE</span>
+        <span className="home-section-number">04 / EXPLORE</span>
         <h2 className="font-display text-2xl text-foreground">Go deeper, your way.</h2>
         <ul className="home-directory-grid mt-4">
           {START.map((item) => (
@@ -167,6 +168,17 @@ export function HomePage() {
       <section className="home-final"><span className="home-section-number">START HERE</span><h2>Your next month can be clearer.</h2><p>Try the worksheet first, or create an account and begin with your own records.</p><div><a href="/login">Create account <span aria-hidden="true">↗</span></a><a href="/budget-worksheet">Try the worksheet <span aria-hidden="true">→</span></a></div></section>
       </div>
     </PublicShell>
+  );
+}
+
+function StepCard({ icon, kicker, title, text }: { icon?: ReactNode; kicker?: string; title: string; text: string }) {
+  return (
+    <article className="home-step-card">
+      {icon}
+      {kicker ? <span>{kicker}</span> : null}
+      <h3>{title}</h3>
+      <p>{text}</p>
+    </article>
   );
 }
 
@@ -217,7 +229,7 @@ function MonthPreview() {
           <div className="month-preview-visual">
             <div
               className="month-preview-ring"
-              style={{ background: `conic-gradient(var(--color-expense) 0% ${expenseShare}%, var(--color-savings) ${expenseShare}% ${expenseShare + savingsShare}%, var(--color-income) ${expenseShare + savingsShare}% 100%)` }}
+              style={{ background: `conic-gradient(#EF4444 0% ${Math.max(0, expenseShare - 1.2)}%, transparent ${Math.max(0, expenseShare - 1.2)}% ${expenseShare}%, #3B82F6 ${expenseShare}% ${expenseShare + Math.max(0, savingsShare - 1.2)}%, transparent ${expenseShare + Math.max(0, savingsShare - 1.2)}% ${expenseShare + savingsShare}%, #10B981 ${expenseShare + savingsShare}% 100%)` }}
               role="img"
               aria-label={`Example allocation of ${money(income)} income: ${money(expenses)} expenses, ${money(savings)} savings, and ${money(remaining)} remaining`}
             >
@@ -268,19 +280,5 @@ function MonthPreview() {
 }
 
 function ExampleBalance() {
-  const [amount, setAmount] = useState(25_000);
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const started = performance.now();
-    let frame = 0;
-    const tick = (now: number) => {
-      const progress = Math.min(1, (now - started) / 400);
-      setAmount(Math.round(25_000 * (1 - Math.pow(1 - progress, 3))));
-      if (progress < 1) frame = requestAnimationFrame(tick);
-    };
-    setAmount(0);
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, []);
-  return <strong className="redesign-mock-balance">{previewMoney.format(amount)}</strong>;
+  return <strong className="redesign-mock-balance">{previewMoney.format(25_000)}</strong>;
 }

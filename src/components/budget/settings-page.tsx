@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { CalendarCard } from "@/components/budget/calendar-card";
+import { CategoryBudgets } from "@/components/budget/category-budgets";
 import { ExportCard } from "@/components/budget/export-card";
 import { CURRENCIES, type CurrencyCode } from "@/lib/budget/model";
 import { DEFAULT_CARD_ORDER, useBudget, type OverviewCardId } from "@/lib/budget/store";
@@ -31,6 +32,9 @@ export function SettingsPage() {
         </p>
       </header>
       <ExportCard />
+      <div id="budgets" className="scroll-mt-24">
+        <CategoryBudgets />
+      </div>
       <CalendarCard />
       <section className="panel p-4">
         <h3 className="text-lg font-medium">Appearance</h3>

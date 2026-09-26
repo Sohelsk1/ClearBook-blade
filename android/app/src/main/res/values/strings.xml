@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Clearbook</string>
+    <string name="launch_body">Your ledger opens in the browser. This screen stays here if that handoff does not stick.</string>
+    <string name="launch_open">Open Clearbook</string>
+    <string name="no_browser_title">No browser found</string>
+    <string name="no_browser_body">Install Chrome or another browser, then tap Open Clearbook.</string>
+    <string name="shortcut_login">Log in</string>
+    <string name="shortcut_ledger">Ledger</string>
+    <string name="shortcut_export">Export Excel</string>
+    <string name="offline_title">You are offline</string>
+    <string name="offline_body">Connect to the internet to open your Clearbook account. Transactions are not saved on this device.</string>
+    <string name="offline_retry">Try again</string>
+    <string name="import_title">Choose the PDF in Clearbook</string>
+    <string name="import_body">This app does not upload or store the shared file. After you sign in, use Upload statement on the transactions page and pick the PDF there.</string>
+    <string name="import_open">Open transactions</string>
+</resources>

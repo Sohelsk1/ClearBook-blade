@@ -3,7 +3,7 @@
 const AMOUNT = /^\d+(\.\d{1,2})?$/;
 
 export function parseWorksheetRupees(raw: string): number | null {
-  const cleaned = raw.trim().replace(/,/g, "");
+  const cleaned = raw.trim().replace(/[₹,\s]/g, "");
   if (!cleaned || cleaned.includes("-") || cleaned.includes("+") || !AMOUNT.test(cleaned)) return null;
   const value = Number(cleaned);
   if (!Number.isFinite(value) || value > 1_000_000_000) return null;

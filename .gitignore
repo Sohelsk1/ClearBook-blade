@@ -18,3 +18,7 @@ dist/
 *.jks
 *.aab
 *.apk
+android/.gradle/
+android/**/build/
+android/local.properties
+android/.idea/

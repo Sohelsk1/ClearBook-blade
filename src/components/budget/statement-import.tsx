@@ -4,6 +4,7 @@ import { currentMonthKey, monthLabel, type Transaction } from "@/lib/budget/mode
 import { importStatementTransactions, loadLedger } from "@/lib/budget/ledger";
 import { ledgerRequestSignal, useBudget } from "@/lib/budget/store";
 import { extractIdfcStatement, type StatementRow } from "@/lib/budget/statement-parser";
+import { classifyStatementText } from "@/lib/budget/statement-categories";
 
 async function asTransaction(row: StatementRow): Promise<Transaction> {
   const fingerprint = `${row.date}|${row.kind}|${row.amountCents}|${row.balanceCents}|${row.description}`;
@@ -11,12 +12,14 @@ async function asTransaction(row: StatementRow): Promise<Transaction> {
   const id = "stmt-idfc-" + [...new Uint8Array(digest)].slice(0, 16).map((byte) => byte.toString(16).padStart(2, "0")).join("");
   const parts = row.description.split("/");
   const merchant = (parts[0].toUpperCase() === "UPI" ? parts[3] : parts[2])?.trim().slice(0, 60) || row.description.slice(0, 60);
+  const guess = classifyStatementText(row.kind, `${merchant} ${row.description}`);
   return {
     id,
     date: row.date,
     kind: row.kind,
     amountCents: row.amountCents,
-    categoryId: row.kind === "income" ? "other-in" : "personal",
+    categoryId: guess.categoryId,
+    needsReview: guess.needsReview,
     note: `IDFC FIRST ${row.reference} ${row.description}`.trim().slice(0, 80),
     merchant,
   };
@@ -50,7 +53,8 @@ export function StatementImport() {
       if (signal.aborted || useBudget.getState().ownerId !== ownerId) return;
       useBudget.getState().applyRemote(epoch, response.snapshot);
       useBudget.getState().setViewMonth(month);
-      setMessage(`Added ${response.added} transaction${response.added === 1 ? "" : "s"} for ${monthLabel(month)}. ${response.skipped} already present.`);
+      const review = response.needsReview ? ` ${response.needsReview} need review.` : "";
+      setMessage(`Added ${response.added} transaction${response.added === 1 ? "" : "s"} for ${monthLabel(month)}. ${response.skipped} already present.${review}`);
     } catch (error) {
       if (signal.aborted) return;
       // A network failure during a batch may occur after some rows were saved.

@@ -56,7 +56,7 @@ export function ForgotPasswordPage() {
       <div className="w-full">
         <a href="/" className="flex items-center gap-3 rounded-md" aria-label="Clearbook home">
           <Mark className="size-14 shrink-0" />
-          <p className="wordmark text-3xl text-foreground">Clearbook</p>
+          <p className="wordmark text-3xl text-foreground">ClearBook</p>
         </a>
         <h1 className="mt-6 text-2xl font-medium text-foreground">Reset your password</h1>
         <p className="mt-2 text-sm text-muted-foreground">

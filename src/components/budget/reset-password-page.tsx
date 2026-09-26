@@ -70,7 +70,7 @@ export function ResetPasswordPage({ token, invalid }: { token: string; invalid?:
       <div className="w-full">
         <a href="/" className="flex items-center gap-3 rounded-md" aria-label="Clearbook home">
           <Mark className="size-14 shrink-0" />
-          <p className="wordmark text-3xl text-foreground">Clearbook</p>
+          <p className="wordmark text-3xl text-foreground">ClearBook</p>
         </a>
         <h1 className="mt-6 text-2xl font-medium text-foreground">Choose a new password</h1>
         {phase === "checking" ? <p className="mt-6 text-sm text-muted-foreground">Checking this reset link…</p> : null}

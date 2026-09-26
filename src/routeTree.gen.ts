@@ -12,13 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as BudgetWorksheetRouteImport } from './routes/budget-worksheet'
-import { Route as BudgetsRouteImport } from './routes/budgets'
 import { Route as CategoryBudgetsRouteImport } from './routes/category-budgets'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as FeaturesRouteImport } from './routes/features'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as GoalsRouteImport } from './routes/goals'
 import { Route as InsightsRouteImport } from './routes/insights'
+import { Route as LoansRouteImport } from './routes/loans'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RecordIncomeRouteImport } from './routes/record-income'
 import { Route as ReportsRouteImport } from './routes/reports'
@@ -43,11 +43,6 @@ const SplatRoute = SplatRouteImport.update({
 const BudgetWorksheetRoute = BudgetWorksheetRouteImport.update({
   id: '/budget-worksheet',
   path: '/budget-worksheet',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BudgetsRoute = BudgetsRouteImport.update({
-  id: '/budgets',
-  path: '/budgets',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategoryBudgetsRoute = CategoryBudgetsRouteImport.update({
@@ -78,6 +73,11 @@ const GoalsRoute = GoalsRouteImport.update({
 const InsightsRoute = InsightsRouteImport.update({
   id: '/insights',
   path: '/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoansRoute = LoansRouteImport.update({
+  id: '/loans',
+  path: '/loans',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -135,13 +135,13 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/budget-worksheet': typeof BudgetWorksheetRoute
-  '/budgets': typeof BudgetsRoute
   '/category-budgets': typeof CategoryBudgetsRoute
   '/dashboard': typeof DashboardRoute
   '/features': typeof FeaturesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/goals': typeof GoalsRoute
   '/insights': typeof InsightsRoute
+  '/loans': typeof LoansRoute
   '/login': typeof LoginRoute
   '/record-income': typeof RecordIncomeRoute
   '/reports': typeof ReportsRoute
@@ -157,13 +157,13 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/budget-worksheet': typeof BudgetWorksheetRoute
-  '/budgets': typeof BudgetsRoute
   '/category-budgets': typeof CategoryBudgetsRoute
   '/dashboard': typeof DashboardRoute
   '/features': typeof FeaturesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/goals': typeof GoalsRoute
   '/insights': typeof InsightsRoute
+  '/loans': typeof LoansRoute
   '/login': typeof LoginRoute
   '/record-income': typeof RecordIncomeRoute
   '/reports': typeof ReportsRoute
@@ -180,13 +180,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/budget-worksheet': typeof BudgetWorksheetRoute
-  '/budgets': typeof BudgetsRoute
   '/category-budgets': typeof CategoryBudgetsRoute
   '/dashboard': typeof DashboardRoute
   '/features': typeof FeaturesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/goals': typeof GoalsRoute
   '/insights': typeof InsightsRoute
+  '/loans': typeof LoansRoute
   '/login': typeof LoginRoute
   '/record-income': typeof RecordIncomeRoute
   '/reports': typeof ReportsRoute
@@ -204,13 +204,13 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/budget-worksheet'
-    | '/budgets'
     | '/category-budgets'
     | '/dashboard'
     | '/features'
     | '/forgot-password'
     | '/goals'
     | '/insights'
+    | '/loans'
     | '/login'
     | '/record-income'
     | '/reports'
@@ -226,13 +226,13 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/budget-worksheet'
-    | '/budgets'
     | '/category-budgets'
     | '/dashboard'
     | '/features'
     | '/forgot-password'
     | '/goals'
     | '/insights'
+    | '/loans'
     | '/login'
     | '/record-income'
     | '/reports'
@@ -248,13 +248,13 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/budget-worksheet'
-    | '/budgets'
     | '/category-budgets'
     | '/dashboard'
     | '/features'
     | '/forgot-password'
     | '/goals'
     | '/insights'
+    | '/loans'
     | '/login'
     | '/record-income'
     | '/reports'
@@ -271,13 +271,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
   BudgetWorksheetRoute: typeof BudgetWorksheetRoute
-  BudgetsRoute: typeof BudgetsRoute
   CategoryBudgetsRoute: typeof CategoryBudgetsRoute
   DashboardRoute: typeof DashboardRoute
   FeaturesRoute: typeof FeaturesRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   GoalsRoute: typeof GoalsRoute
   InsightsRoute: typeof InsightsRoute
+  LoansRoute: typeof LoansRoute
   LoginRoute: typeof LoginRoute
   RecordIncomeRoute: typeof RecordIncomeRoute
   ReportsRoute: typeof ReportsRoute
@@ -310,13 +310,6 @@ declare module '@tanstack/react-router' {
       path: '/budget-worksheet'
       fullPath: '/budget-worksheet'
       preLoaderRoute: typeof BudgetWorksheetRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/budgets': {
-      id: '/budgets'
-      path: '/budgets'
-      fullPath: '/budgets'
-      preLoaderRoute: typeof BudgetsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/category-budgets': {
@@ -359,6 +352,13 @@ declare module '@tanstack/react-router' {
       path: '/insights'
       fullPath: '/insights'
       preLoaderRoute: typeof InsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/loans': {
+      id: '/loans'
+      path: '/loans'
+      fullPath: '/loans'
+      preLoaderRoute: typeof LoansRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -450,13 +450,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   BudgetWorksheetRoute: BudgetWorksheetRoute,
-  BudgetsRoute: BudgetsRoute,
   CategoryBudgetsRoute: CategoryBudgetsRoute,
   DashboardRoute: DashboardRoute,
   FeaturesRoute: FeaturesRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   GoalsRoute: GoalsRoute,
   InsightsRoute: InsightsRoute,
+  LoansRoute: LoansRoute,
   LoginRoute: LoginRoute,
   RecordIncomeRoute: RecordIncomeRoute,
   ReportsRoute: ReportsRoute,

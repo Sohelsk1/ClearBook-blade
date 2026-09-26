@@ -12,6 +12,7 @@ import {
   type Kind,
   type Transaction,
 } from "@/lib/budget/model";
+import { classifyStatementText } from "./statement-categories";
 import type {
   BudgetLimit,
   CalendarPrefs,
@@ -77,7 +78,8 @@ export function parseTransaction(value: unknown): Transaction | null {
   const note = typeof row.note === "string" ? row.note.trim().slice(0, 80) : "";
   const merchant = typeof row.merchant === "string" && row.merchant.trim() ? row.merchant.trim().slice(0, 60) : undefined;
   const goalId = typeof row.goalId === "string" && row.goalId ? row.goalId.slice(0, 80) : undefined;
-  return { id: row.id, kind: kind as Kind, amountCents: amount, categoryId, note, date, merchant, goalId };
+  const needsReview = row.needsReview === true;
+  return { id: row.id, kind: kind as Kind, amountCents: amount, categoryId, note, date, merchant, goalId, ...(needsReview ? { needsReview: true } : {}) };
 }
 
 export type TxSplit = { categoryId: string; amountCents: number };
@@ -249,6 +251,7 @@ type TxRow = {
   merchant: string | null;
   goal_id: string | null;
   tx_date: string;
+  needs_review?: boolean | null;
 };
 
 type GoalRow = { id: string; name: string; target_cents: number; icon: string };
@@ -273,6 +276,7 @@ function txFromRow(row: TxRow): Transaction {
     merchant: row.merchant ?? undefined,
     goalId: row.goal_id ?? undefined,
     date: String(row.tx_date).slice(0, 10),
+    ...(row.needs_review ? { needsReview: true } : {}),
   };
 }
 
@@ -281,8 +285,44 @@ async function db() {
   return getSql();
 }
 
+async function backfillImportedCategories(sql: Awaited<ReturnType<typeof db>>, userId: string) {
+  const rows = await sql<{
+    id: string;
+    kind: string;
+    category_id: string;
+    note: string;
+    merchant: string | null;
+    needs_review: boolean | null;
+  }>`
+    select id, kind, category_id, note, merchant, needs_review
+    from ledger_transactions
+    where user_id = ${userId}
+      and category_locked = false
+      and id like 'stmt-idfc-%'
+      and (
+        (kind = 'expense' and category_id = 'personal')
+        or (kind = 'income' and category_id = 'other-in')
+      )
+  `;
+  for (const row of rows) {
+    if (row.kind !== "income" && row.kind !== "expense") continue;
+    const guess = classifyStatementText(row.kind, `${row.merchant ?? ""} ${row.note}`);
+    if (!isCategoryForKind(guess.categoryId, row.kind)) continue;
+    if (guess.categoryId === row.category_id && guess.needsReview === Boolean(row.needs_review)) continue;
+    await sql`
+      update ledger_transactions
+      set category_id = ${guess.categoryId}, needs_review = ${guess.needsReview}
+      where user_id = ${userId}
+        and id = ${row.id}
+        and category_locked = false
+        and category_id = ${row.category_id}
+    `;
+  }
+}
+
 async function readSnapshot(userId: string): Promise<LedgerSnapshot> {
   const sql = await db();
+  await backfillImportedCategories(sql, userId);
   const defaults = emptySettings();
   const month = currentMonthKey();
   await sql`
@@ -301,7 +341,7 @@ async function readSnapshot(userId: string): Promise<LedgerSnapshot> {
     on conflict (user_id) do nothing
   `;
   const transactions = await sql<TxRow>`
-    select id, kind, amount_cents, category_id, note, merchant, goal_id, tx_date
+    select id, kind, amount_cents, category_id, note, merchant, goal_id, tx_date, needs_review
     from ledger_transactions
     where user_id = ${userId}
     order by tx_date desc, id desc
@@ -413,6 +453,8 @@ export const updateLedgerTransaction = createServerFn({ method: "POST" })
       update ledger_transactions
       set kind = ${data.kind},
           amount_cents = ${data.amountCents},
+          category_locked = case when category_id is distinct from ${data.categoryId} then true else category_locked end,
+          needs_review = case when category_id is distinct from ${data.categoryId} then false else needs_review end,
           category_id = ${data.categoryId},
           note = ${data.note},
           merchant = ${data.merchant ?? null},
@@ -541,7 +583,9 @@ export const importStatementTransactions = createServerFn({ method: "POST" })
     const transactions = row.transactions.map((value: unknown) => {
       const tx = parseTransaction(value);
       if (!tx || !tx.id.startsWith("stmt-idfc-") || tx.date.slice(0, 7) !== month || tx.kind === "savings" || tx.goalId) throw new Error("Invalid statement row");
-      return tx;
+      if (tx.kind !== "income" && tx.kind !== "expense") throw new Error("Invalid statement row");
+      const guess = classifyStatementText(tx.kind, `${tx.merchant ?? ""} ${tx.note}`);
+      return { ...tx, categoryId: guess.categoryId, needsReview: guess.needsReview };
     });
     return { month, transactions };
   })
@@ -558,21 +602,22 @@ export const importStatementTransactions = createServerFn({ method: "POST" })
     }));
     let added = 0;
     let skipped = 0;
+    let needsReview = 0;
     for (const tx of data.transactions) {
       const reference = statementReference(tx.note);
       const key = reference ? `${tx.kind}:${tx.amountCents}:${reference}` : "";
       // Legacy manual entries can have a bank reference despite a random id.
-      if (seenIds.has(tx.id) || (key && seenReferences.has(key)) || (reference && existing.some((row) => row.kind === tx.kind && Number(row.amount_cents) === tx.amountCents && row.note.includes(reference.match(/\\d{10,}/)?.[0] ?? "\u0000")))) { skipped++; continue; }
+      if (seenIds.has(tx.id) || (key && seenReferences.has(key)) || (reference && existing.some((row) => row.kind === tx.kind && Number(row.amount_cents) === tx.amountCents && row.note.includes(reference.match(/\d{10,}/)?.[0] ?? "\u0000")))) { skipped++; continue; }
       const inserted = await sql<{ id: string }>`
-        insert into ledger_transactions (id, user_id, kind, amount_cents, category_id, note, merchant, goal_id, tx_date)
+        insert into ledger_transactions (id, user_id, kind, amount_cents, category_id, note, merchant, goal_id, tx_date, needs_review, category_locked)
         values (${tx.id}, ${context.userId}, ${tx.kind}, ${tx.amountCents}, ${tx.categoryId},
-                ${tx.note}, ${tx.merchant ?? null}, null, ${tx.date})
+                ${tx.note}, ${tx.merchant ?? null}, null, ${tx.date}, ${tx.needsReview === true}, false)
         on conflict (user_id, id) do nothing returning id
       `;
-      if (inserted.length) { added++; seenIds.add(tx.id); if (key) seenReferences.add(key); }
+      if (inserted.length) { added++; if (tx.needsReview) needsReview++; seenIds.add(tx.id); if (key) seenReferences.add(key); }
       else skipped++;
     }
-    return { added, skipped, snapshot: await readSnapshot(context.userId) };
+    return { added, skipped, needsReview, snapshot: await readSnapshot(context.userId) };
   });
 
 

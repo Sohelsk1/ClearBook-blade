@@ -19,15 +19,10 @@ export const Route = createRootRoute({
         content:
           "Your money, made clear. A personal ledger for income, expenses, and savings goals.",
       },
-      { name: "theme-color", content: "#F6F4EF" },
+      { name: "theme-color", content: "#09090B" },
     ],
     links: [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap",
-      },
+      { rel: "preload", href: "/fonts/InterVariable.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/__grok/manifest.webmanifest" },

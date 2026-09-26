@@ -7,7 +7,7 @@ const NAV = PUBLIC_PAGES.filter((page) => page.path !== "/");
 export function PublicShell({ path, children }: { path: string; children: ReactNode }) {
   const page = PUBLIC_PAGES.find((item) => item.path === path);
   return (
-    <div className={`public-shell mx-auto min-h-screen w-full px-4 pb-16 pt-4 sm:px-6 sm:pt-6 ${path === "/" ? "public-shell-home max-w-6xl" : "max-w-3xl"}`}>
+    <div className={`public-shell public-dark mx-auto min-h-screen w-full px-4 pb-16 pt-4 sm:px-6 sm:pt-6 ${path === "/" ? "public-shell-home max-w-6xl" : "public-doc max-w-3xl"}`}>
       <a
         href="#content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-10 focus:rounded-md focus:bg-card focus:px-3 focus:py-2"
@@ -17,7 +17,7 @@ export function PublicShell({ path, children }: { path: string; children: ReactN
       <header className="public-header flex flex-wrap items-center justify-between gap-3">
         <a href="/" className="public-brand flex items-center gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background" aria-label="Clearbook home">
           <Mark className="size-11 shrink-0" />
-          <span className="wordmark public-wordmark text-foreground">Clearbook</span>
+          <span className="wordmark public-wordmark text-foreground">ClearBook</span>
         </a>
         <nav aria-label="Account" className="flex flex-wrap items-center gap-2">
           <a
@@ -52,10 +52,8 @@ export function PublicShell({ path, children }: { path: string; children: ReactN
       </nav>
       <main id="content" className="public-main">
         {page && path !== "/" ? (
-          <p className="mt-6 text-sm text-muted-foreground">
-            <a href="/" className="font-medium text-primary underline-offset-2 hover:underline">
-              Home
-            </a>
+          <p className="public-crumb mt-6">
+            <a href="/">Home</a>
             <span aria-hidden="true"> / </span>
             <span>{page.crumb}</span>
           </p>

@@ -150,7 +150,7 @@ export function EntryDialog({
             ) : null}
           </span>
           <input
-            className="field w-full"
+            className="field field-amount w-full"
             inputMode="decimal"
             autoFocus
             autoComplete="off"

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowDownLeft, ArrowUpRight, Landmark } from "lucide-react";
 import { useEditor } from "@/components/budget/frame";
 import type { ChartSlice } from "@/components/budget/spend-chart";
@@ -46,6 +46,7 @@ export function Overview() {
   const settings = useBudget((state) => state.settings);
   const viewMonth = useBudget((state) => state.viewMonth);
   const charts = useCharts();
+  const navigate = useNavigate();
   const { openEdit } = useEditor();
   const bounds = periodBounds(viewMonth, settings.monthStartsOn);
   const summary = useMemo(() => summarizeRange(transactions, bounds.start, bounds.end), [transactions, bounds.start, bounds.end]);
@@ -104,7 +105,7 @@ export function Overview() {
           </p>
         ) : charts ? (
           <div className="mt-3">
-            <charts.DailySpendChart points={points} currency={currency} onSelect={() => {}} />
+            <charts.DailySpendChart points={points} currency={currency} onSelect={(date) => { void navigate({ to: "/transactions", search: { day: date, kind: "expense" } }); }} />
           </div>
         ) : (
           <div className="mt-3 h-48" />
@@ -123,12 +124,12 @@ export function Overview() {
             <p className="mt-4 text-sm text-muted-foreground">Your spending breakdown will appear here.</p>
           ) : (
             <div className="dashboard-donut-content">
-              <div aria-hidden="true">{charts ? <charts.SpendChart slices={slices} total={summary.expense} currency={currency} /> : <div className="h-44" />}</div>
+              <div aria-hidden="true">{charts ? <charts.SpendChart slices={slices} total={summary.expense} currency={currency} onSelect={(id) => { void navigate({ to: "/transactions", search: { category: id, kind: "expense" } }); }} /> : <div className="h-44" />}</div>
               <ul>
                 {slices.map((slice, index) => (
                   <li key={slice.categoryId} className="dashboard-legend-row">
                     <span className={`dashboard-legend-dot dashboard-legend-dot-${index + 1}`} aria-hidden="true" />
-                    <span className="truncate">{slice.label}</span>
+                    <button type="button" className="truncate text-left hover:underline" onClick={() => { void navigate({ to: "/transactions", search: { category: slice.categoryId, kind: "expense" } }); }}>{slice.label}</button>
                     <span className="tabular-nums">{Math.round((slice.cents / summary.expense) * 100)}% · {formatMoney(slice.cents, currency)}</span>
                   </li>
                 ))}
@@ -139,7 +140,7 @@ export function Overview() {
         <section className="panel p-4" aria-labelledby="budget-progress-heading">
           <div className="flex items-center justify-between gap-2">
             <h2 id="budget-progress-heading" className="text-lg font-medium">Budgets</h2>
-            <Link to="/budgets" className="text-sm font-medium text-primary">Manage</Link>
+            <Link to="/settings" hash="budgets" className="text-sm font-medium text-primary">Manage</Link>
           </div>
           {settings.budgets.length === 0 ? (
             <p className="mt-4 text-sm text-muted-foreground">Set a category budget to see progress here.</p>
@@ -216,7 +217,7 @@ export function Overview() {
                   <tr key={tx.id}>
                     <td className="whitespace-nowrap text-muted-foreground">{formatDay(tx.date)}</td>
                     <td className="max-w-48 truncate"><button type="button" onClick={() => openEdit(tx)} className="text-left font-medium hover:underline focus-visible:underline">{tx.merchant || tx.note || tx.categoryId}</button></td>
-                    <td className="text-muted-foreground">{categoryById(tx.categoryId)?.label ?? tx.categoryId}</td>
+                    <td className="text-muted-foreground">{categoryById(tx.categoryId)?.label ?? tx.categoryId}{tx.needsReview ? <span className="tx-review">Needs review</span> : null}</td>
                     <td className={`text-right font-medium tabular-nums ${tx.kind === "income" ? "text-positive" : tx.kind === "expense" ? "text-negative" : "text-savings"}`}>
                       {tx.kind === "income" ? "+" : tx.kind === "expense" ? "−" : ""}{formatMoney(tx.amountCents, currency)}
                     </td>
@@ -246,6 +247,15 @@ export function Overview() {
       <div className="mb-4">
         <h2 className="font-display text-3xl font-medium tracking-tight text-foreground">Your month at a glance</h2>
         <p className="mt-1 text-sm text-muted-foreground">A clearer picture of where your money goes.</p>
+      </div>
+      <div className="mb-4 max-w-md">
+        <a href="/loans" className="panel flex items-center justify-between gap-3 p-4">
+          <span>
+            <span className="block text-sm font-medium">Credit score check</span>
+            <span className="text-xs text-muted-foreground">PAN and date of birth, only with your consent</span>
+          </span>
+          <Landmark className="size-4 text-muted-foreground" aria-hidden="true" />
+        </a>
       </div>
       <div className="grid gap-4 lg:grid-cols-12">
         {settings.cardOrder.map((id) => (

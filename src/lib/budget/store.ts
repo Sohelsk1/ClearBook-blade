@@ -282,7 +282,12 @@ export const useBudget = create<BudgetState>()((set, get) => ({
       set({ notice: { text: AMOUNT_MESSAGE, undo: null } });
       return;
     }
-    const next = { id, ...patch };
+    const next = {
+      ...previous,
+      ...patch,
+      id,
+      needsReview: patch.categoryId !== previous.categoryId ? false : previous.needsReview,
+    };
     const signal = ledgerRequestSignal();
     set((state) => ({ transactions: state.transactions.map((item) => (item.id === id ? next : item)) }));
     void updateLedgerTransaction({ data: next, signal }).catch(() => {

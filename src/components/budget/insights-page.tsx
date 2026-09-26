@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { CategoryBudgets } from "@/components/budget/category-budgets";
 import { TransactionCalendar } from "@/components/budget/transaction-calendar";
 import {
   categoryColor,
@@ -134,8 +133,6 @@ export function InsightsPage() {
         </div>
         {compare.previousRecords === 0 ? null : unusual ? <p className="mt-3 text-sm">{unusual}</p> : <p className="mt-3 text-sm text-muted-foreground">No category stands out against the previous period yet.</p>}
       </section>
-
-      <CategoryBudgets />
 
       <section className="panel p-4" aria-labelledby="repeat-heading">
         <h3 id="repeat-heading" className="text-lg font-medium">Possible recurring payments</h3>

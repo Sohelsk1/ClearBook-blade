@@ -12,8 +12,9 @@ responses.
    `https://clearbookdata.in/__grok/manifest.webmanifest` has the name
    "Clearbook", a 512 px icon, and the correct public HTTPS origin.
 2. Confirm the final Android application ID in Play Console before building.
-   A possible ID is `in.clearbookdata.app`; **do not publish with a provisional
-   ID**. The package ID cannot be changed for that Play listing.
+   A possible ID is `app.clearbookdata.ledger`. Do not use `in.clearbookdata.app`:
+   `in` is a Kotlin keyword, so that package does not compile. **Do not publish
+   with a provisional ID**. The package ID cannot be changed for that Play listing.
 3. Install the current `@bubblewrap/cli` and use
    `bubblewrap init --manifest=https://clearbookdata.in/__grok/manifest.webmanifest`.
    Select the final package ID, Clearbook name and production signing key.

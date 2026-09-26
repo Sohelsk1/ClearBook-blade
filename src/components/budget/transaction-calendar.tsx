@@ -66,34 +66,40 @@ export function TransactionCalendar({ transactions, currency, viewMonth }: {
   }
 
   return (
-    <section className="panel txcal p-4" aria-labelledby="calendar-heading">
-      <div className="txcal-heading">
-        <div>
-          <h3 id="calendar-heading" className="text-lg font-medium">Transaction Calendar</h3>
-          <p className="mt-1 text-sm text-muted-foreground">Darker dates have more transactions. Income, expenses and savings all count.</p>
+    <section className="panel txcal" aria-labelledby="calendar-heading">
+      <div className="txcal-head">
+        <div className="txcal-title">
+          <h3 id="calendar-heading">Transaction Calendar</h3>
+          <p>Darker dates have more transactions. Income, expenses and savings all count.</p>
         </div>
-        <Button variant="secondary" className="txcal-reset" onClick={() => { setError(""); setResetText(""); setConfirmReset(true); }}>
-          <RotateCcw className="size-4" aria-hidden="true" /> Reset All Data
-        </Button>
       </div>
-      <div className="txcal-month">
-        <Button variant="ghost" size="icon" aria-label="Previous calendar month" onClick={() => changeMonth(-1)}><ChevronLeft className="size-4" /></Button>
-        <h4 aria-live="polite">{monthLabel(month)}</h4>
-        <Button variant="ghost" size="icon" aria-label="Next calendar month" onClick={() => changeMonth(1)}><ChevronRight className="size-4" /></Button>
-      </div>
-      <div className="txcal-legend" aria-label="Transaction frequency from none to most">
-        <span>Fewer</span>{[0, 1, 2, 3, 4].map((level) => <span key={level} className={`txcal-legend-swatch txcal-level-${level}`} aria-hidden="true" />)}<span>More</span>
+      <div className="txcal-toolbar">
+        <div className="txcal-month">
+          <Button variant="ghost" size="icon" aria-label="Previous calendar month" onClick={() => changeMonth(-1)}><ChevronLeft className="size-4" /></Button>
+          <h4 key={month} className="txcal-month-label" aria-live="polite">{monthLabel(month)}</h4>
+          <Button variant="ghost" size="icon" aria-label="Next calendar month" onClick={() => changeMonth(1)}><ChevronRight className="size-4" /></Button>
+        </div>
+        <div className="txcal-legend" aria-label="Transaction frequency from none to most">
+          <span>Fewer</span>{[0, 1, 2, 3, 4].map((level) => <span key={level} className={`txcal-legend-swatch txcal-level-${level}`} aria-hidden="true" />)}<span>More</span>
+        </div>
       </div>
       <div className="txcal-weekdays" aria-hidden="true">{["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => <span key={day}>{day}</span>)}</div>
       <div key={month} className={`txcal-grid txcal-enter-${direction}`}>
         {cells.map((cell, index) => cell ? (
-          <button key={cell.date} type="button" className={`txcal-day txcal-level-${cell.level}`}
-            aria-label={`${formatDay(cell.date)}, ${cell.count} transaction${cell.count === 1 ? "" : "s"}`}
+          <button key={cell.date} type="button" className={`txcal-day txcal-level-${cell.level}${cell.date === todayIso ? " txcal-today" : ""}${selected === cell.date ? " txcal-selected" : ""}`}
+            aria-label={`${formatDay(cell.date)}${cell.date === todayIso ? ", today" : ""}, ${cell.count} transaction${cell.count === 1 ? "" : "s"}`}
             aria-current={cell.date === todayIso ? "date" : undefined}
+            aria-pressed={selected === cell.date}
             onClick={() => setSelected(cell.date)}>
-            <span>{cell.number}</span>{cell.count > 0 && <small aria-hidden="true">{cell.count}</small>}
+            <span className="txcal-num">{cell.number}</span>
+            <span className="txcal-count" aria-hidden="true">{cell.count > 0 ? cell.count : "\u00a0"}</span>
           </button>
         ) : <span key={`pad-${index}`} className="txcal-pad" aria-hidden="true" />)}
+      </div>
+      <div className="txcal-footer">
+        <button type="button" className="txcal-reset" onClick={() => { setError(""); setResetText(""); setConfirmReset(true); }}>
+          <RotateCcw className="size-4" aria-hidden="true" /> Reset All Data
+        </button>
       </div>
       {selected && (
         <Modal title={formatDay(selected)} description={`${selectedRows.length} transaction${selectedRows.length === 1 ? "" : "s"} recorded on this date.`} onClose={() => setSelected(null)} placement="sheet" className="txcal-dialog">

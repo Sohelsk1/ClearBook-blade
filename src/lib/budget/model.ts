@@ -11,6 +11,8 @@ export type Transaction = {
   date: string;
   merchant?: string;
   goalId?: string;
+  /** True when a statement import could not confidently choose a category. */
+  needsReview?: boolean;
 };
 
 export type GoalIcon = "shield" | "home" | "plane" | "gift";

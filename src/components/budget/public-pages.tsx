@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PublicShell, ProseSection } from "@/components/budget/public-shell";
 import { PUBLIC_PAGES } from "@/lib/seo";
 import { formatRupees, monthlyRemaining, parseWorksheetRupees } from "@/lib/budget/worksheet";
@@ -187,33 +187,33 @@ export function WorksheetPage() {
       <h1 className="mt-6 font-display text-4xl leading-tight text-foreground">{page.h1}</h1>
       <p className="mt-4 text-sm leading-6 text-foreground">{page.description}</p>
       <ProseSection title="The sum">
-        <p>Remaining = income − expenses − savings. This is the same relationship Clearbook uses for the month you are viewing inside an account. It is not a bank balance, and it does not say whether the result is a good one.</p>
+        <p className="worksheet-formula">Remaining = <span className="is-in">income</span> − <span className="is-out">expenses</span> − <span className="is-save">savings</span>. This is the same relationship Clearbook uses for the month you are viewing inside an account. It is not a bank balance, and it does not say whether the result is a good one.</p>
         <p>
           Example, not a recommendation: income ₹80,000, expenses ₹45,000, and savings ₹10,000 leave ₹25,000. Use “Fill the example” if you want those figures in the form. Replace them with your own, or clear them. Nothing on this page is uploaded or saved.
         </p>
       </ProseSection>
       <form
-        className="panel mt-8 grid gap-4 p-4"
+        className="worksheet-form mt-8 grid gap-4"
         onSubmit={(event) => {
           event.preventDefault();
           setTried(true);
         }}
       >
-        <AmountField label="Income for the month" value={income} onChange={setIncome} />
-        <AmountField label="Expenses for the month" value={expenses} onChange={setExpenses} />
-        <AmountField label="Savings set aside" value={savings} onChange={setSavings} />
+        <AmountField kind="income" label="Income for the month" value={income} onChange={setIncome} />
+        <AmountField kind="expenses" label="Expenses for the month" value={expenses} onChange={setExpenses} />
+        <AmountField kind="savings" label="Savings set aside" value={savings} onChange={setSavings} />
         {invalid ? (
           <p className="text-sm text-negative" role="alert">
             Use zero or a positive amount with at most two decimal places. Negative amounts are not accepted.
           </p>
         ) : null}
         <div className="flex flex-wrap gap-2">
-          <button type="submit" className="press inline-flex h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground">
+          <button type="submit" className="worksheet-calculate press inline-flex h-11 items-center rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground">
             Calculate
           </button>
           <button
             type="button"
-            className="press inline-flex h-11 items-center rounded-md border border-border px-4 text-sm font-medium"
+            className="worksheet-example press inline-flex h-11 items-center rounded-lg border border-white/10 px-4 text-sm font-medium"
             onClick={() => {
               setIncome(EXAMPLE.income);
               setExpenses(EXAMPLE.expenses);
@@ -225,7 +225,7 @@ export function WorksheetPage() {
           </button>
           <button
             type="button"
-            className="press inline-flex h-11 items-center rounded-md px-4 text-sm font-medium text-muted-foreground"
+            className="worksheet-clear press inline-flex h-11 items-center rounded-lg px-4 text-sm font-medium text-muted-foreground underline-offset-4 hover:underline"
             onClick={() => {
               setIncome("");
               setExpenses("");
@@ -236,13 +236,11 @@ export function WorksheetPage() {
             Clear
           </button>
         </div>
-        <p className="text-sm leading-6" role="status" aria-live="polite">
-          {remaining === null
-            ? "Enter all three amounts to see remaining."
-            : remaining < 0
-              ? `Remaining is ${formatRupees(remaining)}. Expenses and savings are higher than income in these figures. That is not a bank overdraft.`
-              : `Remaining is ${formatRupees(remaining)}.`}
-        </p>
+        {remaining !== null && ready ? (
+          <WorksheetResult income={incomeValue} expenses={expenseValue} savings={savingsValue} remaining={remaining} />
+        ) : (
+          <p className="text-sm leading-6" role="status" aria-live="polite">Enter all three amounts to see remaining.</p>
+        )}
       </form>
       <p className="mt-6 text-sm leading-6">
         Inside an account, each record must be greater than zero. This worksheet allows zero so you can describe a month with no expenses or nothing set aside.{" "}
@@ -252,14 +250,14 @@ export function WorksheetPage() {
   );
 }
 
-function AmountField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+function AmountField({ kind, label, value, onChange }: { kind: "income" | "expenses" | "savings"; label: string; value: string; onChange: (value: string) => void }) {
   const id = label.toLowerCase().replace(/[^a-z]+/g, "-");
   return (
-    <label className="grid gap-1 text-sm font-medium" htmlFor={id}>
+    <label className={`worksheet-field worksheet-field-${kind} grid gap-2`} htmlFor={id}>
       {label}
       <input
         id={id}
-        className="field"
+        className="field field-amount"
         inputMode="decimal"
         autoComplete="off"
         value={value}
@@ -269,15 +267,63 @@ function AmountField({ label, value, onChange }: { label: string; value: string;
   );
 }
 
+function WorksheetResult({ income, expenses, savings, remaining }: { income: number; expenses: number; savings: number; remaining: number }) {
+  const [shown, setShown] = useState(0);
+  const total = Math.max(income, expenses + savings + Math.max(remaining, 0), 1);
+  const expensePct = Math.max(0, expenses) / total * 100;
+  const savingsPct = Math.max(0, savings) / total * 100;
+  const remainPct = Math.max(0, remaining) / total * 100;
+  const spendPct = income > 0 ? Math.round(expenses / income * 100) : null;
+  const savePct = income > 0 ? Math.round(savings / income * 100) : null;
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      setShown(remaining);
+      return;
+    }
+    let frame = 0;
+    const started = performance.now();
+    const tick = (now: number) => {
+      const progress = Math.min(1, Math.max(0, (now - started) / 700));
+      setShown(Math.round(remaining * (1 - Math.pow(1 - progress, 3))));
+      if (progress < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [remaining]);
+  const tone = remaining > 0 ? "is-in" : remaining < 0 ? "is-out" : "is-zero";
+  return (
+    <div className="worksheet-result" role="status" aria-live="polite">
+      <p>Monthly remaining</p>
+      <strong className={tone}>{formatRupees(shown)}</strong>
+      {remaining < 0 ? <p className="worksheet-note">Expenses and savings are higher than income in these figures. That is not a bank overdraft.</p> : null}
+      <div className="worksheet-bar" aria-hidden="true">
+        <span className="is-out" style={{ width: `${expensePct}%` }} />
+        <span className="is-save" style={{ width: `${savingsPct}%` }} />
+        <span className="is-in" style={{ width: `${remainPct}%` }} />
+      </div>
+      <ul>
+        <li><i className="is-in" />Income <b>{formatRupees(income)}</b></li>
+        <li><i className="is-out" />Expenses <b>{formatRupees(expenses)}</b></li>
+        <li><i className="is-save" />Savings <b>{formatRupees(savings)}</b></li>
+      </ul>
+      {spendPct !== null && savePct !== null ? (
+        <p className="worksheet-insight">You're spending <b>{spendPct}%</b> of income on expenses and saving <b>{savePct}%</b>.</p>
+      ) : null}
+    </div>
+  );
+}
+
 function PageLinks({ except }: { except: string }) {
   return (
     <section className="mt-10">
       <h2 className="font-display text-2xl text-foreground">Related pages</h2>
-      <ul className="mt-4 divide-y divide-border border-y border-border">
+      <ul className="public-related">
         {PUBLIC_PAGES.filter((item) => item.path !== "/" && item.path !== except).map((item) => (
           <li key={item.path}>
-            <a href={item.path} className="block py-3 text-sm font-medium text-primary hover:underline">
-              {item.h1}
+            <a href={item.path}>
+              <span>{item.h1}</span>
+              <span>{item.description}</span>
             </a>
           </li>
         ))}
