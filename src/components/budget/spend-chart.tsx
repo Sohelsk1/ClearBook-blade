@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Donut3D } from "@/components/budget/donut-3d";
 import { formatCompactMoney, formatDay, formatMoney, type CurrencyCode, type DaySpend, type SpendSlice } from "@/lib/budget/model";
 
 export type ChartSlice = SpendSlice & { fill: string };
@@ -30,6 +31,21 @@ function DarkTip({ active, label, value }: { active?: boolean; label?: string; v
 
 export function SpendChart({ slices, total, currency, onSelect }: SpendChartProps) {
   const reduceMotion = prefersReducedMotion();
+  const [flat, setFlat] = useState(reduceMotion);
+
+  if (!flat) {
+    return (
+      <div className="chart-surface">
+        <div className="relative h-[300px] w-full">
+          <Donut3D slices={slices} onSelect={onSelect} onUnavailable={() => setFlat(true)} />
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-16 text-center">
+            <span className="text-xs text-muted-foreground">Spent</span>
+            <span className="figure-center text-foreground">{formatMoney(total, currency)}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="chart-surface">
@@ -42,10 +58,11 @@ export function SpendChart({ slices, total, currency, onSelect }: SpendChartProp
               nameKey="label"
               innerRadius="64%"
               outerRadius="88%"
-              paddingAngle={slices.length > 1 ? 2 : 0}
-              stroke="none"
+              paddingAngle={slices.length > 1 ? 3 : 0}
+              stroke="var(--color-card)"
+              strokeWidth={2}
               isAnimationActive={!reduceMotion}
-              animationDuration={600}
+              animationDuration={700}
               animationEasing="ease-out"
               onClick={(slice) => {
                 const id = (slice as { categoryId?: string }).categoryId;

@@ -114,7 +114,7 @@ export function EntryDialog({
     <Modal
       title={title}
       placement="sheet"
-      description="Income increases Remaining This Month. Expenses and savings reduce it. This is not a bank balance."
+      description="Income adds to remaining. Expenses and savings reduce it."
       onClose={onClose}
     >
       <form className="mt-5 grid gap-4" onSubmit={submit}>

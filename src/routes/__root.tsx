@@ -33,6 +33,12 @@ export const Route = createRootRoute({
   component: () => (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <style
+          dangerouslySetInnerHTML={{
+            __html:
+              "html,body{background:#f6f4ef;color:#192b35}html[data-theme=dark],html[data-theme=dark] body{background:#0A0A0B;color:#F5F5F7}@media (prefers-color-scheme:dark){html:not([data-theme=light]),html:not([data-theme=light]) body{background:#0A0A0B;color:#F5F5F7}}@media (prefers-reduced-motion:reduce){.cb-boot-mark{animation:none!important}}",
+          }}
+        />
         <HeadContent />
       </head>
       <body className="antialiased">

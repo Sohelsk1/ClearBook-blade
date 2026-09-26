@@ -234,7 +234,7 @@ export function TransactionsPage() {
     <section aria-labelledby="tx-heading">
       <h2 id="tx-heading" className="font-display text-3xl font-medium tracking-tight">Transactions</h2>
       <p className="mt-1 text-sm font-medium">{activeWindow.custom ? "Custom range" : periodLabel(viewMonth, settings.monthStartsOn)}</p>
-      <p className="text-sm text-muted-foreground">{from && to ? `${formatDay(from)} – ${formatDay(to)}` : "Choose a start and end date."} Search notes, merchants, categories, and amounts.</p>
+      <p className="text-sm text-muted-foreground">{from && to ? `${formatDay(from)} – ${formatDay(to)}` : "Choose a start and end date."}</p>
       <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <Total label="Income" value={formatMoney(rangeSummary.income, currency)} />
         <Total label="Expenses" value={formatMoney(rangeSummary.expense, currency)} />
@@ -268,7 +268,37 @@ export function TransactionsPage() {
           <Button onClick={openCreate}>Add Transaction</Button>
         </div>
       ) : (
-        <div className="tx-table">
+        <>
+          <ul className="tx-cards">
+            {table.getRowModel().rows.map((row) => {
+              const tx = row.original;
+              const category = categoryById(tx.categoryId)?.label ?? "Transaction";
+              const title = tx.merchant || tx.note || category;
+              const confirming = confirmId === tx.id;
+              const tone = tx.kind === "income" ? "is-in" : tx.kind === "expense" ? "is-out" : "is-save";
+              return (
+                <li key={tx.id} className="tx-card">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{title}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{formatDay(tx.date)} · {category}{tx.needsReview ? <span className="tx-review">Needs review</span> : null}</p>
+                    {tx.note && tx.merchant ? <p className="tx-card-note">{tx.note}</p> : null}
+                  </div>
+                  <div className="tx-card-side">
+                    <span className={`tx-amount ${tone}`}>{tx.kind === "income" ? "+" : tx.kind === "expense" ? "−" : ""}{formatMoney(tx.amountCents, currency)}</span>
+                    <div className="tx-actions">
+                      <Button variant="ghost" size="sm" className="h-11 px-2" aria-label={`Edit ${title}`} onClick={() => openEdit(tx)}><Pencil className="size-3.5" /></Button>
+                      <Button variant="ghost" size="sm" className="h-11 px-2" aria-label={`Duplicate ${title}`} onClick={() => duplicateTransaction(tx.id)}><Copy className="size-3.5" /></Button>
+                      <Button variant="ghost" size="sm" className="h-11 px-2 text-negative" aria-label={confirming ? `Confirm delete ${title}` : `Delete ${title}`} onClick={() => { if (confirming) { deleteTransaction(tx.id); setConfirmId(null); } else setConfirmId(tx.id); }}>
+                        <Trash2 className="size-3.5" />
+                        {confirming ? "Confirm" : ""}
+                      </Button>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="tx-table">
           <div className="tx-table-scroll">
             <table>
               <thead>
@@ -303,6 +333,7 @@ export function TransactionsPage() {
             <button type="button" disabled={!table.getCanNextPage()} onClick={() => table.nextPage()}>Next</button>
           </div>
         </div>
+        </>
       )}
       <p className="mt-2 text-xs text-muted-foreground">{rows.length} transaction{rows.length === 1 ? "" : "s"}</p>
     </section>

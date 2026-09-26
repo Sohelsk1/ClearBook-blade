@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowDownLeft, ArrowUpRight, Landmark } from "lucide-react";
+import { MonthNote } from "@/components/budget/month-note";
 import { useEditor } from "@/components/budget/frame";
 import type { ChartSlice } from "@/components/budget/spend-chart";
 import {
   allocationOf,
   categoryById,
+  categoryColor,
   dailyExpensesInRange,
   formatDay,
   formatMoney,
@@ -66,10 +68,9 @@ export function Overview() {
         .slice(0, 10),
     [transactions, bounds.start, bounds.end],
   );
-  const sliceColors = ["#F43F5E", "#FB7185", "#FDA4AF", "#E11D48", "#BE123C", "#9F1239"];
-  const slices: ChartSlice[] = summary.spentByCategory.slice(0, 6).map((slice, index) => ({
+  const slices: ChartSlice[] = summary.spentByCategory.slice(0, 6).map((slice) => ({
     ...slice,
-    fill: sliceColors[index],
+    fill: categoryColor(slice.categoryId),
   }));
   const trends = useMemo(() => dailyTrends(transactions, bounds.start, bounds.end), [transactions, bounds.start, bounds.end]);
   const featured = goals[0];
@@ -98,7 +99,7 @@ export function Overview() {
     rhythm: (
       <section className="panel min-w-0 p-4 lg:col-span-7" aria-labelledby="rhythm-heading">
         <h2 id="rhythm-heading" className="text-lg font-medium">Spending Rhythm</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Daily expenses in this period. A flat day means no expense was recorded, not that spending was confirmed as zero.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Daily expenses. An empty day means nothing was recorded.</p>
         {summary.expense === 0 ? (
           <p className="mt-4 text-sm text-muted-foreground">
             {transactions.length === 0 ? "Welcome to Clearbook. Add your first transaction to get started." : "No expenses in this period yet."}
@@ -126,9 +127,9 @@ export function Overview() {
             <div className="dashboard-donut-content">
               <div aria-hidden="true">{charts ? <charts.SpendChart slices={slices} total={summary.expense} currency={currency} onSelect={(id) => { void navigate({ to: "/transactions", search: { category: id, kind: "expense" } }); }} /> : <div className="h-44" />}</div>
               <ul>
-                {slices.map((slice, index) => (
+                {slices.map((slice) => (
                   <li key={slice.categoryId} className="dashboard-legend-row">
-                    <span className={`dashboard-legend-dot dashboard-legend-dot-${index + 1}`} aria-hidden="true" />
+                    <span className="dashboard-legend-dot" style={{ background: slice.fill }} aria-hidden="true" />
                     <button type="button" className="truncate text-left hover:underline" onClick={() => { void navigate({ to: "/transactions", search: { category: slice.categoryId, kind: "expense" } }); }}>{slice.label}</button>
                     <span className="tabular-nums">{Math.round((slice.cents / summary.expense) * 100)}% · {formatMoney(slice.cents, currency)}</span>
                   </li>
@@ -246,8 +247,19 @@ export function Overview() {
     <div className="dashboard-redesign">
       <div className="mb-4">
         <h2 className="font-display text-3xl font-medium tracking-tight text-foreground">Your month at a glance</h2>
-        <p className="mt-1 text-sm text-muted-foreground">A clearer picture of where your money goes.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Where the money went.</p>
       </div>
+      <MonthNote
+        viewMonth={viewMonth}
+        currency={currency}
+        remaining={summary.remaining}
+        income={summary.income}
+        expense={summary.expense}
+        recordCount={transactions.filter((tx) => tx.date >= bounds.start && tx.date <= bounds.end).length}
+        reviewCount={transactions.filter((tx) => tx.date >= bounds.start && tx.date <= bounds.end && tx.needsReview).length}
+        budgetCount={settings.budgets.length}
+        top={summary.spentByCategory[0]}
+      />
       <div className="mb-4 max-w-md">
         <a href="/loans" className="panel flex items-center justify-between gap-3 p-4">
           <span>
@@ -298,7 +310,7 @@ function GoalCard({ goal, saved, monthSaved, currency }: { goal: Goal; saved: nu
       <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={`${goal.name} progress`}>
         <div className="meter-fill h-full bg-savings" style={{ transform: `scaleX(${Math.max(0, Math.min(1, ratio))})` }} />
       </div>
-      <p className="mt-2 text-sm text-muted-foreground">Saved This Month is {formatMoney(monthSaved, currency)}. The bar is every contribution to this goal, including other months.</p>
+      <p className="mt-2 text-sm text-muted-foreground">This month {formatMoney(monthSaved, currency)}. The bar includes every month.</p>
       <Link to="/goals" className="mt-3 inline-flex h-11 items-center text-sm font-medium text-primary underline-offset-2 hover:underline">
         Manage Goal
       </Link>

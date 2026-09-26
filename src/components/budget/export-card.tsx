@@ -108,9 +108,7 @@ export function ExportCard() {
     <section className="panel p-4 sm:p-5" id="data-backup" aria-labelledby="export-heading">
       <p className="text-sm text-muted-foreground">Data & Backup</p>
       <h3 id="export-heading" className="font-display mt-1 text-2xl font-medium tracking-tight">Export My Data</h3>
-      <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-        Download an Excel workbook of this account only. Clearbook builds it on the server from your ledger. It does not include anyone else’s records, passwords, or sign-in tokens.
-      </p>
+      <p className="mt-1 max-w-2xl text-sm text-muted-foreground">Excel for this account only.</p>
       <fieldset className="mt-4">
         <legend className="text-sm font-medium">Date range</legend>
         <div className="mt-2 flex flex-wrap gap-2">

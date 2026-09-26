@@ -52,14 +52,14 @@ export function InsightsPage() {
     <div className="grid gap-4">
       <header>
         <h2 className="font-display text-3xl font-medium tracking-tight">Insights</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Recorded activity only. Nothing here is a forecast unless it says estimate.</p>
+        <p className="mt-1 text-sm text-muted-foreground">What you recorded. Estimates are labeled.</p>
       </header>
 
       <section className="panel p-4" aria-labelledby="flow-heading">
         <h3 id="flow-heading" className="text-lg font-medium">Money Flow</h3>
-        <p className="mt-1 text-sm text-muted-foreground">Income splits into expenses, saved, and what remains.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Income, expenses, savings, and what is left.</p>
         {compare.current.income <= 0 ? (
-          <p className="mt-3 text-sm text-muted-foreground">Income is zero, so there is no split to draw.</p>
+          <p className="mt-3 text-sm text-muted-foreground">No income recorded, so there is no split.</p>
         ) : compare.current.remaining < 0 ? (
           <p className="mt-3 text-sm text-negative">Shortfall of {formatMoney(Math.abs(compare.current.remaining), currency)}. Expenses and savings exceed income, so percentages are not shown.</p>
         ) : (
@@ -136,8 +136,8 @@ export function InsightsPage() {
 
       <section className="panel p-4" aria-labelledby="repeat-heading">
         <h3 id="repeat-heading" className="text-lg font-medium">Possible recurring payments</h3>
-        <p className="mt-1 text-sm text-muted-foreground">These repeat in your records. Confirming one schedules it. It is not added as a transaction.</p>
-        {suggestions.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">Not enough repeated history yet. A suggestion needs the same expense in at least two months.</p> : null}
+        <p className="mt-1 text-sm text-muted-foreground">These repeat. Confirming one does not add a transaction.</p>
+        {suggestions.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">Needs the same expense in two months.</p> : null}
         <ul className="mt-3 space-y-2">
           {suggestions.map((item) => (
             <li key={item.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-muted px-3 py-2 text-sm">
@@ -179,7 +179,7 @@ export function InsightsPage() {
 
       <section className="panel p-4" aria-labelledby="plan-heading">
         <h3 id="plan-heading" className="text-lg font-medium">Plan a Purchase</h3>
-        <p className="mt-1 text-sm text-muted-foreground">Estimate only. This does not check a bank account and does not save anything until you add the transaction.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Preview only. Nothing is saved.</p>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           <label className="grid gap-1 text-sm">
             Amount
@@ -190,7 +190,7 @@ export function InsightsPage() {
             <input className="field" type="date" value={purchaseDate} onChange={(event) => setPurchaseDate(event.target.value)} />
           </label>
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">Assumes the purchase is an expense on that date, and subtracts confirmed upcoming payments that are not already recorded ({formatMoney(upcomingTotal, currency)}).</p>
+        <p className="mt-2 text-xs text-muted-foreground">Also subtracts upcoming payments ({formatMoney(upcomingTotal, currency)}).</p>
         {parsedPurchase != null && after != null ? (
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <div>

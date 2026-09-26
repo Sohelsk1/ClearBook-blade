@@ -42,7 +42,7 @@ export function LoansPage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight">Loans & Credit</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Upload a CIBIL report to see loans, cards, and outstanding amounts. Clearbook does not fetch this from a bureau.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Upload a CIBIL PDF. Clearbook does not fetch a score.</p>
         </div>
         {report ? <p className="text-xs text-muted-foreground">Last updated {report.uploadedAt.slice(0, 10)}</p> : null}
       </div>

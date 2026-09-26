@@ -17,6 +17,7 @@ import { useBudget } from "@/lib/budget/store";
 import { ImportBanner } from "@/components/budget/import-banner";
 import { EditorContext } from "@/components/budget/editor-context";
 import { Mark } from "@/components/budget/frame";
+import { SvgTheme } from "@/components/budget/svg-theme";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, active: (path: string) => path === "/dashboard" },
@@ -80,6 +81,7 @@ export function FrameInner({ children, userId }: { children: ReactNode; userId: 
   return (
     <EditorContext.Provider value={api}>
       <div className="app-redesign mx-auto min-h-screen w-full" data-appearance={settings.theme}>
+        <SvgTheme />
         <aside id="app-sidebar" className={navOpen ? "app-sidebar is-open" : "app-sidebar"} aria-label="Main navigation">
           <Link to="/dashboard" className="app-sidebar-brand" aria-label="Clearbook dashboard">
             <Mark className="size-8 shrink-0" />
@@ -142,7 +144,9 @@ export function FrameInner({ children, userId }: { children: ReactNode; userId: 
               </div>
             </div>
           ) : null}
-          {children}
+          <div key={pathname} className="page-rise">
+            {children}
+          </div>
         </div>
       </div>
       <nav className="app-bottom-nav" aria-label="Sections">

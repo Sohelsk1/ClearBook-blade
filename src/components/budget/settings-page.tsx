@@ -27,9 +27,7 @@ export function SettingsPage() {
     <div className="grid gap-4">
       <header>
         <h2 className="font-display text-3xl font-medium tracking-tight">Settings</h2>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Your ledger is saved with this account. Sign in on another device and the same transactions, goals, and budgets are there. They are not stored only in this browser. Google Calendar is not synced, and Clearbook does not use end-to-end encryption.
-        </p>
+        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">Saved with this account, not only on this phone.</p>
       </header>
       <ExportCard />
       <div id="budgets" className="scroll-mt-24">
@@ -48,7 +46,7 @@ export function SettingsPage() {
       </section>
       <section className="panel p-4">
         <h3 className="text-lg font-medium">Currency</h3>
-        <p className="mt-1 text-sm text-muted-foreground">This only changes how amounts are written. Clearbook does not convert between currencies.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Changes the symbol only. Amounts are not converted.</p>
         <label className="mt-3 grid gap-1 text-sm">
           Display currency
           <select className="field max-w-xs" value={currency} onChange={(event) => setCurrency(event.target.value as CurrencyCode)}>
@@ -60,7 +58,7 @@ export function SettingsPage() {
       </section>
       <section className="panel p-4">
         <h3 className="text-lg font-medium">Financial month</h3>
-        <p className="mt-1 text-sm text-muted-foreground">Choose the day a month starts. 1 uses the calendar month. Later days run into the next calendar month.</p>
+        <p className="mt-1 text-sm text-muted-foreground">1 is a calendar month. A later day runs into the next month.</p>
         <label className="mt-3 grid max-w-xs gap-1 text-sm">
           Starts on day
           <input
@@ -75,7 +73,7 @@ export function SettingsPage() {
       </section>
       <section className="panel p-4">
         <h3 className="text-lg font-medium">Overview order</h3>
-        <p className="mt-1 text-sm text-muted-foreground">Move cards with the keyboard. This does not change the numbers.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Changes the order, not the numbers.</p>
         <ol className="mt-3 space-y-2">
           {settings.cardOrder.map((id, index) => (
             <li key={id} className="flex items-center justify-between gap-3 rounded-md bg-muted px-3 py-2">
@@ -91,7 +89,7 @@ export function SettingsPage() {
       </section>
       <section className="panel p-4">
         <h3 className="text-lg font-medium">Scheduled payments</h3>
-        {settings.recurring.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">None confirmed. Suggestions appear on Insights when the same expense shows up in two months.</p> : null}
+        {settings.recurring.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">None yet. Insights suggests a repeat after two months.</p> : null}
         <ul className="mt-2 space-y-2">
           {settings.recurring.map((item) => (
             <li key={item.id} className="flex items-center justify-between gap-3 text-sm">

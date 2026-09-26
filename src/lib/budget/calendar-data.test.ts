@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { calendarDays } from "./calendar-data.ts";
 
@@ -23,4 +24,13 @@ test("empty month stays neutral and leap-day is present", () => {
   const cells = calendarDays("2028-02", []);
   assert.equal(cells.filter(Boolean).length, 29);
   assert.equal(cells.find((cell) => cell?.date === "2028-02-29")?.level, 0);
+});
+
+test("the day number and the transaction count are not drawn as one number", () => {
+  const css = readFileSync(new URL("../../styles.css", import.meta.url), "utf8");
+  const calendar = readFileSync(new URL("../../components/budget/transaction-calendar.tsx", import.meta.url), "utf8");
+  assert.match(calendar, /className="txcal-num"/);
+  assert.match(calendar, /className="txcal-count"/);
+  assert.match(css, /\.txcal-count\{position:absolute/);
+  assert.doesNotMatch(css, /\.txcal-day small\{/);
 });

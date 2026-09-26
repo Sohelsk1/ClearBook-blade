@@ -585,7 +585,7 @@ export const importStatementTransactions = createServerFn({ method: "POST" })
       if (!tx || !tx.id.startsWith("stmt-idfc-") || tx.date.slice(0, 7) !== month || tx.kind === "savings" || tx.goalId) throw new Error("Invalid statement row");
       if (tx.kind !== "income" && tx.kind !== "expense") throw new Error("Invalid statement row");
       const guess = classifyStatementText(tx.kind, `${tx.merchant ?? ""} ${tx.note}`);
-      return { ...tx, categoryId: guess.categoryId, needsReview: guess.needsReview };
+      return { ...tx, categoryId: guess.categoryId, needsReview: guess.needsReview || tx.needsReview === true };
     });
     return { month, transactions };
   })

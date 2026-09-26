@@ -70,7 +70,7 @@ export function TransactionCalendar({ transactions, currency, viewMonth }: {
       <div className="txcal-head">
         <div className="txcal-title">
           <h3 id="calendar-heading">Transaction Calendar</h3>
-          <p>Darker dates have more transactions. Income, expenses and savings all count.</p>
+          <p>Darker days have more records.</p>
         </div>
       </div>
       <div className="txcal-toolbar">

@@ -20,6 +20,8 @@ declare global {
   }
 }
 
+if (typeof window !== "undefined") window.__cbHydrated = true;
+
 function isResetPath(pathname: string) {
   return pathname === "/reset-password" || pathname.startsWith("/reset-password/");
 }
@@ -46,12 +48,20 @@ export function Mark({ className }: { className?: string }) {
 
 function LoadingScreen({ label }: { label: string }) {
   return (
-    <main id="account-boot" data-state="loading" className="mx-auto min-h-screen w-full max-w-6xl px-4 py-10">
-      <div className="flex items-center gap-3">
-        <Mark className="size-11 shrink-0" />
-        <p className="wordmark text-foreground">ClearBook</p>
+    <main id="account-boot" data-state="loading" className="cb-boot">
+      <div className="cb-boot-brand">
+        <span className="cb-boot-mark"><Mark className="size-11 shrink-0" /></span>
+        <div>
+          <p className="wordmark text-foreground">ClearBook</p>
+          <p className="cb-boot-status" data-boot-detail>{label}</p>
+        </div>
       </div>
-      <p className="mt-2 text-sm text-muted-foreground" data-boot-detail>{label}</p>
+      <div className="cb-boot-layout" aria-hidden="true">
+        <div className="cb-boot-side" />
+        <div className="cb-boot-main">
+          <span /><span /><span />
+        </div>
+      </div>
       <div id="account-boot-actions" hidden className="mt-4 flex gap-3 text-sm">
         <a href="" className="underline">Reload</a>
         <a href="/login" className="underline">Sign in</a>
@@ -197,7 +207,7 @@ export function Frame({ children }: { children: ReactNode }) {
   }
 
   if (shell === "session_loading") {
-    return <LoadingScreen label="Loading your account…" />;
+    return <LoadingScreen label="Checking your account…" />;
   }
   if (shell === "session_error") {
     return (

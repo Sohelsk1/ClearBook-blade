@@ -61,10 +61,7 @@ export function PublicShell({ path, children }: { path: string; children: ReactN
         {children}
       </main>
       <footer className="public-footer mt-12 border-t border-border pt-6 text-sm text-muted-foreground">
-        <p>Clearbook is a ledger you keep yourself. It is not a bank, and it does not show anyone else’s records.</p>
-        <p className="mt-3">
-          Product notes updated 24 September 2026. These pages describe how Clearbook works. They are not personal financial advice.
-        </p>
+        <p>A ledger you keep yourself. Not a bank.</p>
         <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
           {PUBLIC_PAGES.map((item) => (
             <li key={item.path}>

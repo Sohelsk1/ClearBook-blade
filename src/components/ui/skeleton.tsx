@@ -62,7 +62,7 @@ export function SidebarSkeleton() {
 export function LedgerSkeleton() {
   return (
     <div className="ledger-skeleton" role="status" aria-live="polite">
-      <span className="sr-only">Loading your ledger…</span>
+      <p className="cb-boot-status">Loading your ledger…</p>
       <SidebarSkeleton />
       <div className="ledger-skeleton-main">
         <div className="skeleton-stat-grid">

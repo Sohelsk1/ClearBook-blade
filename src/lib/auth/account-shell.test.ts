@@ -63,6 +63,13 @@ test("retry after a timeout can reach the ready shell", () => {
   assert.equal(recovered, "ready");
 });
 
+test("the bundle marks itself started before React paints, so the fallback cannot replace a live app", () => {
+  const frame = readFileSync(new URL("../../components/budget/frame.tsx", import.meta.url), "utf8");
+  assert.match(frame, /if \(typeof window !== "undefined"\) window\.__cbHydrated = true/);
+  assert.match(frame, /Checking your account/);
+  assert.match(frame, /id="account-boot"/);
+});
+
 test("a live app is not replaced by the asset fallback, and a dead bundle recovers once", () => {
   assert.equal(accountBootFallback({ hydrated: true, recovered: false }), "none");
   assert.equal(accountBootFallback({ hydrated: false, recovered: false }), "recover");

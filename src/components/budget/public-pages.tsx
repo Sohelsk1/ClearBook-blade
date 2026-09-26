@@ -13,26 +13,13 @@ export function FeaturesPage() {
       <h1 className="mt-6 font-display text-4xl leading-tight text-foreground">{page.h1}</h1>
       <p className="mt-4 text-sm leading-6 text-foreground">{page.description}</p>
       <ProseSection title="A record, not a bank feed">
-        <p>
-          Every number in Clearbook starts as something you type: an amount greater than zero, a category, a date, and an optional note and merchant. There is no bank connection and no reading of SMS or UPI alerts.
-        </p>
-        <p>
-          You can search, filter, and sort the list, then edit, duplicate, or delete a record. A deletion can be undone. An expense can be split across categories. The split parts replace the original amount, so the expense is not counted twice.
-        </p>
+        <p>You type each amount, category, and date. There is no bank connection.</p>
       </ProseSection>
       <ProseSection title="The month you are looking at">
-        <p>
-          Move forward or back by month. Remaining for that period is income minus expenses minus savings. Charts use only the spending recorded in the period. If the previous equivalent period has no records, Clearbook says there is not enough data to compare. It does not treat a missing month as zero spending. If that earlier period has records and the spending is zero, it says so and does not show a percentage increase.
-        </p>
-        <p>
-          Scheduled payments can be listed, and you can download a calendar file. That file does not stay synced with Google Calendar.
-        </p>
+        <p>Remaining is income minus expenses minus savings. A missing month is not treated as zero.</p>
       </ProseSection>
       <ProseSection title="Your account only">
-        <p>
-          A new account starts empty. The ledger is stored with the account, so signing in on another device shows the same records. From Settings you can download an Excel file of your own transactions, goals, and budgets. Other people’s records are not in that file.
-        </p>
-        <p>Sign-in is email and password, Google, or X. A password reset can be requested from the login screen. Delivery depends on mail being set up for the site.</p>
+        <p>A new account starts empty. The same records appear on any device you sign in to. Export Excel from Settings.</p>
       </ProseSection>
       <PageLinks except="/features" />
     </PublicShell>
@@ -46,25 +33,13 @@ export function TrackExpensesPage() {
       <h1 className="mt-6 font-display text-4xl leading-tight text-foreground">{page.h1}</h1>
       <p className="mt-4 text-sm leading-6 text-foreground">{page.description}</p>
       <ProseSection title="What one expense contains">
-        <p>
-          An expense needs an amount greater than zero, a date, and one of the spending categories: {EXPENSE_CATEGORIES.join(", ")}. A merchant and a note are optional. For example, a vegetable purchase can be Groceries, dated the day you paid, with the shop name as the merchant. That example is only a shape for a record. It is not a suggested budget.
-        </p>
-        <p>
-          Clearbook will not accept a negative amount, zero, or a blank. A refund does not belong here as a minus. Record it as income. See <a className="font-medium text-primary underline-offset-2 hover:underline" href="/record-income">Record income</a>.
-        </p>
+        <p>An amount above zero, a date, and a category such as {EXPENSE_CATEGORIES.join(", ")}. A refund is income, not a negative expense.</p>
       </ProseSection>
       <ProseSection title="Finding it later">
-        <p>
-          The transaction list can be searched and filtered, then sorted by date or amount. Open a row to edit it, duplicate it when the same payment happens again, or delete it and undo that delete if it was a mistake.
-        </p>
-        <p>
-          If one payment covers two categories, split it. The parts stand in for the original amount. Totals do not add the parent and the parts together.
-        </p>
+        <p>Search, filter, edit, duplicate, or delete. Split a payment if it covers two categories.</p>
       </ProseSection>
       <ProseSection title="What this page is not">
-        <p>
-          This is not automatic expense tracking. Clearbook does not see your bank, card, or UPI messages. Cash you do not write down is simply absent. The monthly picture is only as complete as the records you add.
-        </p>
+        <p>Not automatic tracking. Cash you do not write down is simply absent.</p>
       </ProseSection>
       <p className="mt-8 text-sm">
         <a href="/login" className="font-medium text-primary underline-offset-2 hover:underline">Create an account</a>
@@ -83,20 +58,13 @@ export function RecordIncomePage() {
       <h1 className="mt-6 font-display text-4xl leading-tight text-foreground">{page.h1}</h1>
       <p className="mt-4 text-sm leading-6 text-foreground">{page.description}</p>
       <ProseSection title="Income categories">
-        <p>Income uses four categories: {INCOME_CATEGORIES.join(", ")}. Each record still needs an amount greater than zero and a date.</p>
-        <p>
-          Pay is for wages or salary you choose to record. Side work is for other earned money. Other income is the rest. None of these categories creates an invoice or a tax form.
-        </p>
+        <p>{INCOME_CATEGORIES.join(", ")}. Each record needs an amount above zero and a date.</p>
       </ProseSection>
       <ProseSection title="A refund is income">
-        <p>
-          If a shop returns money, record a Refund for the amount you received. Do not enter the original expense as a negative number. The original expense can stay as the spending that happened. The refund is new income on the day it arrived. That keeps expenses from being silently reduced.
-        </p>
+        <p>Record the money you got back as Refund. Leave the original expense as it was.</p>
       </ProseSection>
       <ProseSection title="How income changes the month">
-        <p>
-          Remaining for the period you are viewing is income, minus expenses, minus savings. Income you have not entered is not assumed. A month with expenses and no income records will show those expenses against zero income, which is a gap in the ledger, not a bank overdraft.
-        </p>
+        <p>Remaining is income minus expenses minus savings. Unentered income is not assumed.</p>
       </ProseSection>
       <p className="mt-8 text-sm">
         <a href="/track-expenses" className="font-medium text-primary underline-offset-2 hover:underline">Expenses</a>
@@ -115,22 +83,10 @@ export function CategoryBudgetsPage() {
       <h1 className="mt-6 font-display text-4xl leading-tight text-foreground">{page.h1}</h1>
       <p className="mt-4 text-sm leading-6 text-foreground">{page.description}</p>
       <ProseSection title="A limit is not a payment">
-        <p>
-          A category budget is a ceiling you type for a spending category, such as Groceries or Transport. Clearbook compares that ceiling with the expenses you recorded in the month you are viewing. If recorded spending is higher, the category is over the limit you set. Clearbook does not block the purchase, transfer money, or tell you what the limit should be.
-        </p>
-        <p>
-          The limit itself must be greater than zero. Leaving a category without a limit means there is nothing to compare. That is different from a limit of zero, which the product does not accept.
-        </p>
-      </ProseSection>
-      <ProseSection title="A labeled example">
-        <p>
-          Suppose you set Groceries to ₹8,000 for the month you are viewing, and the grocery expenses you recorded add up to more than that. The category is over by the difference. Those rupees are an illustration of the comparison, not a recommended grocery budget for a household in India.
-        </p>
+        <p>A budget is a ceiling you type. Clearbook compares it with expenses you recorded. It does not block a purchase.</p>
       </ProseSection>
       <ProseSection title="Tied to the month you open">
-        <p>
-          Budgets follow the financial month, including a start day from the 1st through the 28th. Changing the month changes which expenses are counted against the limit. Spending outside that window is not silently included.
-        </p>
+        <p>Only expenses in the month you are viewing count toward the limit.</p>
       </ProseSection>
       <p className="mt-8 text-sm">
         <a href="/track-expenses" className="font-medium text-primary underline-offset-2 hover:underline">Record the expenses</a>
@@ -147,17 +103,10 @@ export function SavingsGoalsPage() {
       <h1 className="mt-6 font-display text-4xl leading-tight text-foreground">{page.h1}</h1>
       <p className="mt-4 text-sm leading-6 text-foreground">{page.description}</p>
       <ProseSection title="More than one target">
-        <p>
-          You can keep more than one goal, each with a name and a target amount greater than zero. A savings record is money you set aside on a date. It can point at a goal. Savings are not income and they are not an expense. They reduce remaining, because remaining is income minus expenses minus savings.
-        </p>
+        <p>Each goal has a name and a target. Savings reduce remaining. They are not income or an expense.</p>
       </ProseSection>
-      <ProseSection title="Progress, and when a pace is shown">
-        <p>
-          Progress is the amount saved toward that goal compared with the target you set. Clearbook does not invent a monthly pace. A completion estimate is shown only when the period you are viewing already contains a savings contribution. With no savings record in the period, there is no estimate.
-        </p>
-        <p>
-          An emergency fund, a trip, or a purchase are names you choose. The product does not suggest a target amount.
-        </p>
+      <ProseSection title="Progress">
+        <p>The bar is what you saved against the target you set. No pace is shown until this period has a contribution.</p>
       </ProseSection>
       <p className="mt-8 text-sm">
         <a href="/budget-worksheet" className="font-medium text-primary underline-offset-2 hover:underline">The worksheet</a>
@@ -187,10 +136,8 @@ export function WorksheetPage() {
       <h1 className="mt-6 font-display text-4xl leading-tight text-foreground">{page.h1}</h1>
       <p className="mt-4 text-sm leading-6 text-foreground">{page.description}</p>
       <ProseSection title="The sum">
-        <p className="worksheet-formula">Remaining = <span className="is-in">income</span> − <span className="is-out">expenses</span> − <span className="is-save">savings</span>. This is the same relationship Clearbook uses for the month you are viewing inside an account. It is not a bank balance, and it does not say whether the result is a good one.</p>
-        <p>
-          Example, not a recommendation: income ₹80,000, expenses ₹45,000, and savings ₹10,000 leave ₹25,000. Use “Fill the example” if you want those figures in the form. Replace them with your own, or clear them. Nothing on this page is uploaded or saved.
-        </p>
+        <p className="worksheet-formula">Remaining = <span className="is-in">income</span> − <span className="is-out">expenses</span> − <span className="is-save">savings</span>. Not a bank balance.</p>
+        <p>Example: ₹80,000 − ₹45,000 − ₹10,000 = ₹25,000. Nothing on this page is saved.</p>
       </ProseSection>
       <form
         className="worksheet-form mt-8 grid gap-4"
@@ -243,8 +190,7 @@ export function WorksheetPage() {
         )}
       </form>
       <p className="mt-6 text-sm leading-6">
-        Inside an account, each record must be greater than zero. This worksheet allows zero so you can describe a month with no expenses or nothing set aside.{" "}
-        <a href="/login" className="font-medium text-primary underline-offset-2 hover:underline">Create an account</a> when you want the records kept.
+        <a href="/login" className="font-medium text-primary underline-offset-2 hover:underline">Create an account</a> to keep the records.
       </p>
     </PublicShell>
   );

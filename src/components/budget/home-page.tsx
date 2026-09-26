@@ -1,43 +1,22 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChartNoAxesCombined, Download, PencilLine } from "lucide-react";
-import { PublicShell, ProseSection } from "@/components/budget/public-shell";
+import { PublicShell } from "@/components/budget/public-shell";
 import { HeroUnderline, useHomeCinema } from "@/components/budget/home-stage";
-import { HOME_DESCRIPTION } from "@/lib/seo";
 
-const RECORD = [
-  "Income, expenses, and money set aside, each with a category, date, note, and merchant.",
-  "Search, filter, and sort those records. Edit, duplicate, or delete one. A deleted record can be undone.",
-  "Amounts have to be greater than zero. A refund is its own income category, not a negative expense.",
-] as const;
-
-const MONTH = [
-  "Move between months. The financial month can start on a day other than the 1st.",
-  "Remaining is income, minus expenses, minus savings, for the period you are viewing. It is not a bank balance.",
-  "Category budgets and savings goals are limits and targets you set yourself.",
-  "Charts use the spending you recorded. A comparison with the previous period is shown only when that earlier period has records.",
-] as const;
-
-const ACCOUNT = [
-  "Sign in with email and password, Google, or X. A new account starts empty.",
-  "The ledger is saved with the account. Sign in on another device and the same records are there. They are not stored only in this browser.",
-  "From Settings you can download an Excel file of your own transactions, goals, and budgets.",
-] as const;
-
-const LIMITS = [
-  "Clearbook does not connect to a bank or read bank and UPI messages. A supported current-month statement PDF can be imported from your account.",
-  "A currency label changes the symbol only. Amounts are not converted.",
-  "Google Calendar is not connected. A calendar file you download does not stay in sync.",
-  "Records are saved with your account on the server. Clearbook does not use end-to-end encryption.",
-  "A password reset can be requested from the login screen.",
+const NOTES = [
+  "You type each record. Clearbook does not connect to a bank.",
+  "Remaining is income minus expenses minus savings. It is not a bank balance.",
+  "Your ledger stays with your account on any device you sign in to.",
+  "Excel export is in Settings. Changing currency only changes the symbol.",
 ] as const;
 
 const START = [
-  { href: "/features", label: "Features", text: "The full list of what the ledger can and cannot do." },
-  { href: "/track-expenses", label: "Daily expenses", text: "How to write down a purchase, search it later, or split it." },
-  { href: "/record-income", label: "Income", text: "Pay, side work, and refunds, kept separate from expenses." },
-  { href: "/category-budgets", label: "Category budgets", text: "A limit you set, compared with spending you recorded." },
-  { href: "/savings-goals", label: "Savings goals", text: "Targets and the money you choose to set aside." },
-  { href: "/budget-worksheet", label: "Worksheet", text: "Try the monthly remaining sum without creating an account." },
+  { href: "/features", label: "Features", text: "What the ledger does." },
+  { href: "/track-expenses", label: "Expenses", text: "Write down a purchase." },
+  { href: "/record-income", label: "Income", text: "Pay, side work, and refunds." },
+  { href: "/category-budgets", label: "Budgets", text: "A limit you set yourself." },
+  { href: "/savings-goals", label: "Goals", text: "Money you set aside." },
+  { href: "/budget-worksheet", label: "Worksheet", text: "Try the sum without an account." },
 ] as const;
 
 export function HomePage() {
@@ -70,14 +49,14 @@ export function HomePage() {
       <div ref={motionScope} className="home-motion">
       <section className="hero hero-landing redesign-hero mt-8" aria-labelledby="home-headline">
         <div className="hero-copy">
-          <p className="redesign-eyebrow hero-eyebrow"><span className="hero-mark-fallback" aria-hidden="true" /> A personal ledger, made for real life</p>
+          <p className="redesign-eyebrow hero-eyebrow"><span className="hero-mark-fallback" aria-hidden="true" /> A personal ledger</p>
           <h1 id="home-headline">Your money, <span className="hero-gradient">made clear.</span><HeroUnderline /></h1>
-          <p className="redesign-hero-description">{HOME_DESCRIPTION} Start with manual entries, then see the month clearly.</p>
+          <p className="redesign-hero-description">Record income, expenses, and savings. See what is left this month.</p>
           <div className="hero-actions">
             <a href="/login" className="press redesign-primary">Create account <span aria-hidden="true">↗</span></a>
             <a href="/login?mode=login" className="press redesign-secondary">Log in</a>
           </div>
-          <p className="redesign-hero-note">Your ledger starts empty. The preview is illustrative.</p>
+          <p className="redesign-hero-note">A new account starts empty.</p>
         </div>
         <div className="redesign-mock" aria-label="Example Clearbook dashboard, not real account data">
           <div className="redesign-mock-top"><span>MONTHLY OVERVIEW</span><span>EXAMPLE DATA</span></div>
@@ -95,59 +74,28 @@ export function HomePage() {
       </section>
 
       <section className="redesign-feature-section" aria-labelledby="redesign-features-heading">
-        <div className="home-section-heading"><span className="home-section-number">01 / THE ESSENTIALS</span><h2 id="redesign-features-heading">Everything in one clear view.</h2></div>
+        <div className="home-section-heading"><span className="home-section-number">01</span><h2 id="redesign-features-heading">The essentials</h2></div>
         <div className="home-step-grid">
-          <StepCard icon={<PencilLine aria-hidden="true" />} title="Record your way" text="Add income, expenses, and savings on the dates they happened." />
-          <StepCard icon={<ChartNoAxesCombined aria-hidden="true" />} title="Understand your month" text="See categories, budgets, and what remains after the amounts you recorded." />
-          <StepCard icon={<Download aria-hidden="true" />} title="Keep a copy" text="Export your own ledger to Excel from Settings whenever you need it." />
+          <StepCard icon={<PencilLine aria-hidden="true" />} title="Record" text="Add income, expenses, and savings." />
+          <StepCard icon={<ChartNoAxesCombined aria-hidden="true" />} title="See the month" text="Categories, budgets, and what is left." />
+          <StepCard icon={<Download aria-hidden="true" />} title="Export" text="Download your ledger as Excel." />
         </div>
       </section>
 
       <MonthPreview />
 
       <section className="home-intro" aria-labelledby="home-intro-title">
-        <span className="home-section-number" aria-hidden="true">02 / THE IDEA</span>
+        <span className="home-section-number" aria-hidden="true">02</span>
         <div>
-          <h2 id="home-intro-title">A little more clarity. <em>A lot less guesswork.</em></h2>
-          <p>Put your everyday money in one place. See what came in, what went out, and what you chose to set aside—without pretending the example below is your real bank balance.</p>
-        </div>
-      </section>
-
-      <section className="home-steps" aria-labelledby="home-steps-title">
-        <div className="home-section-heading"><span className="home-section-number">03 / THE FLOW</span><h2 id="home-steps-title">Your month, in three moves.</h2></div>
-        <div className="home-step-grid">
-          <StepCard kicker="01" title="Record it." text="Add income, expenses, and savings on the dates they happened." />
-          <StepCard kicker="02" title="See it." text="Read the month you choose, with categories and a clear remaining sum." />
-          <StepCard kicker="03" title="Make a plan." text="Set category budgets and savings goals that suit your own life." />
+          <h2 id="home-intro-title">One ledger. <em>Your numbers.</em></h2>
+          <p>What came in, what went out, and what you set aside.</p>
         </div>
       </section>
 
       <div className="home-details">
-      <ProseSection title="Who it is for">
-        <p>
-          Clearbook is for a person tracking their own money: salary or other income, everyday expenses, and amounts set aside. Amounts display in rupees unless you change the symbol. It is not accounting software, and it does not prepare GST invoices, business books, or tax returns.
-        </p>
-        <p>
-          You can type each record yourself. For supported text-based IDFC FIRST Bank PDFs, the signed-in Transactions page can import entries for the current month. Clearbook does not connect to your bank or read bank SMS.
-        </p>
-      </ProseSection>
-
-      <ProseSection title="How a month works">
-        <ol className="grid list-decimal gap-3 pl-5">
-          <li>Create an account. It starts empty. Nobody else’s records are included.</li>
-          <li>Add income, expenses, and savings for the dates they happened.</li>
-          <li>
-            Read the month you are viewing. Remaining is income, minus expenses, minus savings. That figure is not your bank balance.
-          </li>
-        </ol>
-        <p>
-          The financial month can start on any day from the 1st through the 28th. Someone paid on the 7th can start the month on the 7th.
-        </p>
-      </ProseSection>
-
       <section className="home-directory mt-10">
-        <span className="home-section-number">04 / EXPLORE</span>
-        <h2 className="font-display text-2xl text-foreground">Go deeper, your way.</h2>
+        <span className="home-section-number">03</span>
+        <h2 className="font-display text-2xl text-foreground">Look around</h2>
         <ul className="home-directory-grid mt-4">
           {START.map((item) => (
             <li key={item.href}>
@@ -160,12 +108,9 @@ export function HomePage() {
         </ul>
       </section>
 
-      <FactList title="Record what happened" items={RECORD} />
-      <FactList title="See the month" items={MONTH} />
-      <FactList title="Kept with your account" items={ACCOUNT} />
-      <FactList title="Good to know" items={LIMITS} />
+      <FactList title="Good to know" items={NOTES} />
       </div>
-      <section className="home-final"><span className="home-section-number">START HERE</span><h2>Your next month can be clearer.</h2><p>Try the worksheet first, or create an account and begin with your own records.</p><div><a href="/login">Create account <span aria-hidden="true">↗</span></a><a href="/budget-worksheet">Try the worksheet <span aria-hidden="true">→</span></a></div></section>
+      <section className="home-final"><span className="home-section-number">START</span><h2>Start with your own records.</h2><div><a href="/login">Create account <span aria-hidden="true">↗</span></a><a href="/budget-worksheet">Try the worksheet <span aria-hidden="true">→</span></a></div></section>
       </div>
     </PublicShell>
   );
@@ -214,13 +159,11 @@ function MonthPreview() {
       <div className="month-preview-header">
         <div>
           <p className="month-preview-eyebrow">A clearer view of your month</p>
-          <h2 id="month-preview-title" className="font-display text-2xl text-foreground">See where the money went.</h2>
+          <h2 id="month-preview-title" className="font-display text-2xl text-foreground">Where the money went</h2>
         </div>
         <span className="month-preview-badge">Illustrative example</span>
       </div>
-      <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-        Add your own records to see a monthly picture like this. These figures are examples, not a real account or suggested budget.
-      </p>
+      <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">Example only. Not a real account.</p>
       <div className="month-preview-grid">
         <div className="month-preview-balance">
           <p className="text-sm text-muted-foreground">Remaining after expenses and savings</p>
@@ -242,7 +185,7 @@ function MonthPreview() {
             <div className="month-preview-visual-note">
               <span className="month-preview-visual-kicker">One month, at a glance</span>
               <strong>See the whole picture.</strong>
-              <span>Move the savings slider below to see what changes.</span>
+              <span>Move the slider. Remaining updates.</span>
             </div>
           </div>
           <div className="month-preview-bar mt-5" role="img" aria-label={`Example: ${money(expenses)} expenses, ${money(savings)} savings, and ${money(remaining)} remaining from ${money(income)} income`}>
@@ -266,13 +209,12 @@ function MonthPreview() {
         <div className="month-preview-try-heading">
           <div>
             <label htmlFor="preview-savings" className="font-medium text-foreground">What if you set aside {money(savings)}?</label>
-            <p id="month-preview-range-help" className="mt-1 text-xs text-muted-foreground">Move the slider to see how savings change the amount remaining.</p>
+            <p id="month-preview-range-help" className="mt-1 text-xs text-muted-foreground">Savings change what is left.</p>
           </div>
           <button type="button" className="month-preview-reset" onClick={() => setSavings(10_000)}>Reset</button>
         </div>
         <input id="preview-savings" className="month-preview-range" type="range" min="0" max="30000" step="1000" value={savings} onChange={(event) => setSavings(Number(event.target.value))} aria-describedby="month-preview-range-help" />
         <div className="month-preview-range-labels" aria-hidden="true"><span>₹0</span><span>₹30,000</span></div>
-        <p className="mt-3 text-xs leading-5 text-muted-foreground">Try the example here; your changes are not saved to an account.</p>
       </div>
       <a href="/budget-worksheet" className="month-preview-link">Try your own figures <span aria-hidden="true">→</span></a>
     </section>
