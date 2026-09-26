@@ -269,16 +269,20 @@ export function Overview() {
         <h2 className="font-display text-3xl font-medium tracking-tight text-foreground">Your statement at a glance</h2>
         <p className="mt-1 text-sm text-muted-foreground">See where your money went during this statement period.</p>
       </div>
-      <section className="panel mb-4 p-4" aria-labelledby="statement-period-heading">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 id="statement-period-heading" className="text-sm font-medium">Statement period</h2>
-            <p className="mt-1 text-lg font-medium tabular-nums">{formatDay(bounds.start)} – {formatDay(bounds.end)}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{transactions.filter((tx) => tx.date >= bounds.start && tx.date <= bounds.end).length} transactions</p>
+{statementPeriod ? (
+        <section className="panel mb-4 p-4" aria-labelledby="statement-period-heading">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 id="statement-period-heading" className="text-sm font-medium">Statement period</h2>
+              <p className="mt-1 text-lg font-medium tabular-nums">{formatDay(bounds.start)} – {formatDay(bounds.end)}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{transactions.filter((tx) => tx.date >= bounds.start && tx.date <= bounds.end).length} transactions</p>
+            </div>
+            <StatementImport />
           </div>
-          <StatementImport />
-        </div>
-      </section>
+        </section>
+      ) : (
+        <StatementImport />
+      )}
       <div className="mb-4 max-w-md">
         <a href="/loans" className="panel flex items-center justify-between gap-3 p-4">
           <span>
