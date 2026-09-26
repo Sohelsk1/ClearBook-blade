@@ -1410,6 +1410,26 @@ body:has(.public-shell-home),body:has(.auth-redesign){background:#0A0A0B}
 :root[data-theme="dark"] .tx-direction.is-out{background:rgb(244 63 94 / .16);color:#fb7185}
 :root[data-theme="dark"] .tx-direction.is-in{background:rgb(16 185 129 / .16);color:#34d399}
 :root[data-theme="dark"] .tx-direction.is-save{background:rgb(245 158 11 / .16);color:#fbbf24}
+.tx-total{border:1px solid var(--border);border-radius:12px;padding:.65rem .75rem;background:var(--card);position:relative;overflow:hidden}
+.tx-total::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--primary)}
+.tx-total-income{background:linear-gradient(135deg,#ecfdf5,#fff)}
+.tx-total-income::before{background:#10b981}.tx-total-expense{background:linear-gradient(135deg,#fff1f2,#fff)}
+.tx-total-expense::before{background:#f43f5e}.tx-total-savings{background:linear-gradient(135deg,#fffbeb,#fff)}
+.tx-total-savings::before{background:#f59e0b}.tx-total-remaining{background:linear-gradient(135deg,#eff6ff,#fff)}
+.tx-total-remaining::before{background:#3b82f6}
+.tx-passbook-line{display:flex;align-items:center;gap:.65rem;min-width:0}
+.tx-passbook-icon{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border-radius:10px;flex:none}
+.tx-passbook-icon.is-in{background:#dcfce7;color:#16a34a}.tx-passbook-icon.is-out{background:#fee2e2;color:#dc2626}.tx-passbook-icon.is-save{background:#fef3c7;color:#d97706}
+.tx-passbook-meta{display:flex;align-items:center;flex-wrap:wrap;gap:.5rem;margin-top:.3rem;color:var(--muted-foreground);font-size:.72rem}
+.tx-category-chip{display:inline-flex;align-items:center;gap:.3rem;padding:.15rem .45rem;border-radius:999px;background:var(--muted);font-weight:600;color:var(--foreground)}
+.tx-passbook-card{position:relative;overflow:hidden}.tx-passbook-card::before{content:"";position:absolute;inset:0 auto 0 0;width:4px}
+.tx-passbook-card.is-in::before{background:#10b981}.tx-passbook-card.is-out::before{background:#f43f5e}.tx-passbook-card.is-save::before{background:#f59e0b}
+.tx-passbook-row.is-in td:first-child{border-left:3px solid #10b981}.tx-passbook-row.is-out td:first-child{border-left:3px solid #f43f5e}.tx-passbook-row.is-save td:first-child{border-left:3px solid #f59e0b}
+.tx-passbook-row:hover{background:color-mix(in srgb,var(--color-muted) 55%,transparent)}
+:root[data-theme="dark"] .tx-total-income{background:rgb(16 185 129 / .08)}
+:root[data-theme="dark"] .tx-total-expense{background:rgb(244 63 94 / .08)}
+:root[data-theme="dark"] .tx-total-savings{background:rgb(245 158 11 / .08)}
+:root[data-theme="dark"] .tx-total-remaining{background:rgb(59 130 246 / .08)}
 .tx-note { margin-top: .2rem; color: var(--muted-foreground); font-size: .75rem; line-height: 1.4; white-space: normal; }
 .tx-cat { display: inline-flex; align-items: center; gap: .4rem; white-space: nowrap; }
 .tx-dot { width: .55rem; height: .55rem; border-radius: 999px; flex: none; }
