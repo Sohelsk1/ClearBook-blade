@@ -1,6 +1,6 @@
-import { ArrowRight, CheckCircle2, Circle, FileText, Info, PiggyBank, ReceiptText, RefreshCw, ShoppingBag, TrendingUp, Upload, Utensils } from "lucide-react";
-import { formatDay, formatMoney, type CurrencyCode, type Transaction } from "@/lib/budget/model";
-import type { RecurringItem } from "@/lib/budget/store";
+import { ArrowRight, CheckCircle2, Circle, FileText, Info, PiggyBank, ReceiptText, RefreshCw, ShoppingBag, Upload, Utensils } from "lucide-react";
+import { formatMoney, type CurrencyCode, type Transaction } from "@/lib/budget/model";
+import type { RecurringPayment } from "@/lib/budget/store";
 
 type MoneyRiskProps = {
   transactions: Transaction[];
@@ -95,13 +95,10 @@ export function MoneyRiskCard({ transactions, start, end, currency, recurring, o
   const previousTxCount = transactions.filter((tx) => tx.date >= previous.start && tx.date <= previous.end).length;
   const confidence = transactions.length >= 120 && previousTxCount >= 20 ? "High" : transactions.length >= 40 || previousTxCount >= 10 ? "Medium" : "Low";
   const risk = riskLabel(current.score);
-  const discretionaryCents = Math.round(current.expense * current.discretionaryRate);
-  const improvement = current.score > 10 ? Math.max(1, Math.round(current.score * 0.08)) : 0;
-  const targetScore = Math.max(0, current.score - improvement);
-  const shoppingCents = transactions.filter((tx) => tx.date >= start && tx.date <= end && tx.kind === "expense" && tx.categoryId === "shopping").reduce((sum, tx) => sum + tx.amountCents, 0);
+    const shoppingCents = transactions.filter((tx) => tx.date >= start && tx.date <= end && tx.kind === "expense" && tx.categoryId === "shopping").reduce((sum, tx) => sum + tx.amountCents, 0);
   const diningCents = transactions.filter((tx) => tx.date >= start && tx.date <= end && tx.kind === "expense" && tx.categoryId === "dining").reduce((sum, tx) => sum + tx.amountCents, 0);
 
-  const scoreAngle = -90 + (current.score / 100) * 180;
+  const scoreAngle = (current.score / 100) * 180;
   const hasEnoughForTrend = previousTxCount > 0;
 
   return (
@@ -139,7 +136,7 @@ export function MoneyRiskCard({ transactions, start, end, currency, recurring, o
                 return <line key={tick} x1={ix} y1={iy} x2={cx} y2={cy} stroke="white" strokeWidth="3" opacity=".8" />;
               })}
               <g transform={`rotate(${scoreAngle} 310 260)`} style={{ transition: "transform 800ms cubic-bezier(.2,.8,.2,1)" }}>
-                <line x1="310" y1="260" x2="310" y2="104" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+                <line x1="310" y1="260" x2="154" y2="260" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
                 <circle cx="310" cy="260" r="17" fill="currentColor" />
                 <circle cx="310" cy="260" r="6" fill="white" />
               </g>
