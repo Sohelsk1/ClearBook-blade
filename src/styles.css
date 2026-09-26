@@ -1754,3 +1754,71 @@ body:has(.app-redesign[data-appearance="dark"]){background:#0A0A0B}
 .loans-tone-excellent,.loans-tone-good{color:#059669}
 .loans-tone-fair,.loans-tone-below{color:#d97706}
 .loans-tone-poor{color:#b56d78}
+
+
+/* Exact colorful passbook UI — visual polish only. */
+.tx-total{border-radius:14px!important;padding:.8rem .9rem!important;border:1px solid transparent!important;box-shadow:0 4px 12px rgb(15 23 42 / .06)!important}
+.tx-total dt{font-weight:700!important}
+.tx-total dd{margin-top:.22rem;font-size:.92rem!important;font-weight:800!important}
+.tx-total-income{background:linear-gradient(135deg,#dcfce7 0%,#f0fdf4 100%)!important;border-color:#86efac!important}
+.tx-total-income::before{background:#16a34a!important}
+.tx-total-expense{background:linear-gradient(135deg,#fee2e2 0%,#fff1f2 100%)!important;border-color:#fca5a5!important}
+.tx-total-expense::before{background:#dc2626!important}
+.tx-total-savings{background:linear-gradient(135deg,#fef3c7 0%,#fffbeb 100%)!important;border-color:#fcd34d!important}
+.tx-total-savings::before{background:#d97706!important}
+.tx-total-remaining{background:linear-gradient(135deg,#dbeafe 0%,#eff6ff 100%)!important;border-color:#93c5fd!important}
+.tx-total-remaining::before{background:#2563eb!important}
+
+.tx-direction{padding:.2rem .58rem!important;font-size:.76rem!important;font-weight:900!important;box-shadow:inset 0 0 0 1px currentColor}
+.tx-direction.is-out{background:#fee2e2!important;color:#dc2626!important}
+.tx-direction.is-in{background:#dcfce7!important;color:#16a34a!important}
+.tx-direction.is-save{background:#fef3c7!important;color:#d97706!important}
+.tx-counterparty{gap:.5rem!important;font-weight:800!important}
+.tx-counterparty-name{font-weight:900!important;color:var(--color-foreground)}
+.tx-passbook-icon{width:2.25rem!important;height:2.25rem!important;border-radius:999px!important}
+.tx-passbook-icon.is-out{background:#fee2e2!important;color:#dc2626!important}
+.tx-passbook-icon.is-in{background:#dcfce7!important;color:#16a34a!important}
+.tx-passbook-icon.is-save{background:#fef3c7!important;color:#d97706!important}
+.tx-passbook-card{border-radius:14px!important;background:#fff!important;box-shadow:0 2px 8px rgb(15 23 42 / .04)!important}
+.tx-passbook-card.is-out::before{width:5px!important;background:#ef4444!important}
+.tx-passbook-card.is-in::before{width:5px!important;background:#22c55e!important}
+.tx-passbook-card.is-save::before{width:5px!important;background:#f59e0b!important}
+.tx-passbook-row.is-out td:first-child{border-left:4px solid #ef4444!important}
+.tx-passbook-row.is-in td:first-child{border-left:4px solid #22c55e!important}
+.tx-passbook-row.is-save td:first-child{border-left:4px solid #f59e0b!important}
+.tx-category-chip{padding:.2rem .55rem!important;font-weight:800!important;border-width:1px!important}
+.tx-amount.is-out{color:#dc2626!important;font-weight:900!important}
+.tx-amount.is-in{color:#16a34a!important;font-weight:900!important}
+.tx-amount.is-save{color:#d97706!important;font-weight:900!important}
+.tx-note,.tx-card-note{color:#64748b!important}
+
+.dashboard-donut-content{gap:1rem!important}
+.dashboard-legend-row{padding:.55rem .65rem!important;border-radius:10px!important;margin-bottom:.35rem!important;border:1px solid transparent}
+.dashboard-legend-row:nth-child(1){background:#dbeafe!important;border-color:#bfdbfe!important}
+.dashboard-legend-row:nth-child(2){background:#ffedd5!important;border-color:#fed7aa!important}
+.dashboard-legend-row:nth-child(3){background:#dcfce7!important;border-color:#bbf7d0!important}
+.dashboard-legend-row:nth-child(4){background:#ede9fe!important;border-color:#ddd6fe!important}
+.dashboard-legend-row:nth-child(5){background:#fce7f3!important;border-color:#fbcfe8!important}
+.dashboard-legend-row:nth-child(6){background:#cffafe!important;border-color:#a5f3fc!important}
+.dashboard-legend-dot{width:12px!important;height:12px!important;border-radius:4px!important;box-shadow:0 0 0 2px rgb(255 255 255 / .7)}
+
+.statement-pdf-button{min-height:48px!important;border:1px solid #cbd5e1!important;border-radius:12px!important;background:#f8fafc!important;color:#1e293b!important;padding:.5rem .8rem!important}
+.statement-pdf-button:hover{background:#eff6ff!important;border-color:#93c5fd!important}
+.reset-data-button{min-height:48px!important;border:2px solid #ef4444!important;border-radius:12px!important;background:#fff!important;color:#dc2626!important;font-weight:800!important}
+.reset-data-button:hover{background:#fef2f2!important}
+
+.credit-score-check{background:linear-gradient(135deg,#fdf4ff 0%,#e0f2fe 100%)!important;border-color:#e9d5ff!important;box-shadow:0 4px 12px rgb(15 23 42 / .05)!important}
+.credit-score-check:hover{border-color:#c4b5fd!important}
+
+@media (max-width:639px){
+  .tx-total{padding:.72rem .75rem!important}
+  .tx-total dt{font-size:.72rem!important}
+  .tx-total dd{font-size:.84rem!important}
+  .tx-passbook-card{padding:.8rem .75rem!important}
+}
+:root[data-theme="dark"] .tx-passbook-card{background:var(--color-card)!important}
+:root[data-theme="dark"] .tx-total-income{background:rgb(34 197 94 / .14)!important;border-color:rgb(74 222 128 / .3)!important}
+:root[data-theme="dark"] .tx-total-expense{background:rgb(239 68 68 / .14)!important;border-color:rgb(248 113 113 / .3)!important}
+:root[data-theme="dark"] .tx-total-savings{background:rgb(245 158 11 / .14)!important;border-color:rgb(251 191 36 / .3)!important}
+:root[data-theme="dark"] .tx-total-remaining{background:rgb(37 99 235 / .16)!important;border-color:rgb(96 165 250 / .3)!important}
+:root[data-theme="dark"] .dashboard-legend-row{border-color:rgb(255 255 255 / .08)!important}
