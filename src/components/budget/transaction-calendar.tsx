@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import { categoryById, currentMonthKey, formatDay, formatMoney, monthLabel, shiftMonth, type CurrencyCode, type Transaction } from "@/lib/budget/model";
-import { loadLedger, resetLedgerData } from "@/lib/budget/ledger";
+import { categoryById, formatDay, formatMoney, monthLabel, shiftMonth, type CurrencyCode, type Transaction } from "@/lib/budget/model";
 import { calendarDays } from "@/lib/budget/calendar-data";
-import { ledgerRequestSignal, useBudget } from "@/lib/budget/store";
+
 
 export function TransactionCalendar({ transactions, currency, viewMonth }: {
   transactions: Transaction[]; currency: CurrencyCode; viewMonth: string;
@@ -13,10 +12,6 @@ export function TransactionCalendar({ transactions, currency, viewMonth }: {
   const [month, setMonth] = useState(viewMonth);
   const [direction, setDirection] = useState<"next" | "previous">("next");
   const [selected, setSelected] = useState<string | null>(null);
-  const [confirmReset, setConfirmReset] = useState(false);
-  const [resetText, setResetText] = useState("");
-  const [resetPending, setResetPending] = useState(false);
-  const [error, setError] = useState("");
   const cells = useMemo(() => calendarDays(month, transactions), [month, transactions]);
   const selectedRows = useMemo(() => transactions.filter((tx) => tx.date === selected)
     .sort((a, b) => a.id.localeCompare(b.id)), [transactions, selected]);
@@ -33,37 +28,6 @@ export function TransactionCalendar({ transactions, currency, viewMonth }: {
     setSelected(null);
   }
 
-  async function resetAll() {
-    if (resetText !== "RESET" || resetPending) return;
-    setResetPending(true);
-    setError("");
-    const { epoch, ownerId } = useBudget.getState();
-    const signal = ledgerRequestSignal();
-    try {
-      const snapshot = await resetLedgerData({ data: { confirm: "RESET" }, signal });
-      if (signal.aborted || useBudget.getState().ownerId !== ownerId) return;
-      useBudget.getState().applyRemote(epoch, snapshot);
-      useBudget.setState({ notice: null });
-      setMonth(currentMonthKey());
-      setSelected(null);
-      setConfirmReset(false);
-      setResetText("");
-    } catch {
-      if (!signal.aborted) {
-        // A lost response can follow a successful reset; reconcile before retry.
-        try {
-          const snapshot = await loadLedger({ signal });
-          if (!signal.aborted && useBudget.getState().ownerId === ownerId) {
-            useBudget.getState().applyRemote(epoch, snapshot);
-            useBudget.setState({ notice: null });
-          }
-        } catch { /* The existing ledger stays visible until the connection returns. */ }
-        setError("Connection interrupted. Check your ledger before trying again.");
-      }
-    } finally {
-      setResetPending(false);
-    }
-  }
 
   return (
     <section className="panel txcal" aria-labelledby="calendar-heading">
@@ -96,11 +60,6 @@ export function TransactionCalendar({ transactions, currency, viewMonth }: {
           </button>
         ) : <span key={`pad-${index}`} className="txcal-pad" aria-hidden="true" />)}
       </div>
-      <div className="txcal-footer">
-        <button type="button" className="txcal-reset" onClick={() => { setError(""); setResetText(""); setConfirmReset(true); }}>
-          <RotateCcw className="size-4" aria-hidden="true" /> Reset All Data
-        </button>
-      </div>
       {selected && (
         <Modal title={formatDay(selected)} description={`${selectedRows.length} transaction${selectedRows.length === 1 ? "" : "s"} recorded on this date.`} onClose={() => setSelected(null)} placement="sheet" className="txcal-dialog">
           <dl className="txcal-totals">
@@ -122,20 +81,4 @@ export function TransactionCalendar({ transactions, currency, viewMonth }: {
           </ul> : <p className="mt-5 text-sm text-muted-foreground">No transactions recorded for this date.</p>}
         </Modal>
       )}
-      {confirmReset && (
-        <Modal title="Reset All Data" description="Permanently delete this account's transactions, savings goals, budgets, recurring schedules and export history. Your account and sign-in remain." onClose={() => { if (!resetPending) setConfirmReset(false); }} className="txcal-dialog">
-          <label className="mt-5 grid gap-2 text-sm font-medium">
-            Type RESET to confirm
-            <input className="field" value={resetText} onChange={(event) => setResetText(event.target.value)} autoComplete="off" aria-describedby="reset-warning" />
-          </label>
-          <p id="reset-warning" className="mt-2 text-sm text-muted-foreground">This cannot be undone. The calendar and ledger will become empty.</p>
-          {error && <p className="mt-3 text-sm text-negative" role="alert">{error}</p>}
-          <div className="mt-5 flex flex-wrap justify-end gap-2">
-            <Button variant="secondary" disabled={resetPending} onClick={() => setConfirmReset(false)}>Cancel</Button>
-            <Button className="txcal-danger" disabled={resetText !== "RESET" || resetPending} onClick={resetAll}>{resetPending ? "Resetting…" : "Delete all data"}</Button>
-          </div>
-        </Modal>
-      )}
-    </section>
-  );
-}
+
