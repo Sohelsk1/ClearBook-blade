@@ -7,12 +7,24 @@ import { ledgerRequestSignal, useBudget } from "@/lib/budget/store";
 import { extractStatement, type StatementRow } from "@/lib/budget/statement-parser";
 import { classifyStatementText } from "@/lib/budget/statement-categories";
 
+function extractStatementCounterparty(description: string): string {
+  const parts = description.split("/").map((part) => part.trim()).filter(Boolean);
+  const rail = (parts[0] ?? "").toUpperCase();
+  if (rail === "UPI") {
+    // Common UPI narration: UPI/DR|CR/<sequence>/<counterparty>/...
+    return (parts[3] || parts[2] || "").slice(0, 60) || description.slice(0, 60);
+  }
+  if (["IMPS", "NEFT", "RTGS", "IFT"].includes(rail)) {
+    return (parts[2] || parts[1] || "").slice(0, 60) || description.slice(0, 60);
+  }
+  return (parts[2] || parts[1] || "").slice(0, 60) || description.slice(0, 60);
+}
+
 async function asTransaction(row: StatementRow, bank: string): Promise<Transaction> {
   const fingerprint = `${row.date}|${row.kind}|${row.amountCents}|${row.balanceCents}|${row.description}`;
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(fingerprint));
   const id = "stmt-idfc-" + [...new Uint8Array(digest)].slice(0, 16).map((byte) => byte.toString(16).padStart(2, "0")).join("");
-  const parts = row.description.split("/");
-  const merchant = (parts[0].toUpperCase() === "UPI" ? parts[3] : parts[2])?.trim().slice(0, 60) || row.description.slice(0, 60);
+  const merchant = extractStatementCounterparty(row.description);
   const guess = classifyStatementText(row.kind, `${merchant} ${row.description}`);
   return {
     id,
