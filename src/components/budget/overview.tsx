@@ -313,7 +313,7 @@ export function Overview() {
         <span className="report-download-icon" aria-hidden="true"><Download className="size-5" /></span>
       </button>
       <div className="mb-4 max-w-md">
-        <a href="/loans" className="panel flex items-center justify-between gap-3 p-4">
+        <a href="/loans" className="panel credit-score-check flex items-center justify-between gap-3 p-4">
           <span>
             <span className="block text-sm font-medium">Credit score check</span>
             <span className="text-xs text-muted-foreground">PAN and date of birth, only with your consent</span>
