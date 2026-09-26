@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowDownLeft, ArrowUpRight, Landmark } from "lucide-react";
-import { MonthNote } from "@/components/budget/month-note";
+import { StatementImport } from "@/components/budget/statement-import";
 import { useEditor } from "@/components/budget/frame";
 import type { ChartSlice } from "@/components/budget/spend-chart";
 import {
+  addDays,
   allocationOf,
   categoryById,
   categoryColor,
   dailyExpensesInRange,
+  daySpan,
   formatDay,
   formatMoney,
   periodBounds,
@@ -18,6 +20,7 @@ import {
   totalSavings,
   type CurrencyCode,
   type DaySpend,
+  type PeriodWindows,
   type Goal,
   type Transaction,
 } from "@/lib/budget/model";
@@ -47,17 +50,34 @@ export function Overview() {
   const currency = useBudget((state) => state.currency);
   const settings = useBudget((state) => state.settings);
   const viewMonth = useBudget((state) => state.viewMonth);
+  const statementPeriod = useBudget((state) => state.statementPeriod);
   const charts = useCharts();
   const navigate = useNavigate();
   const { openEdit } = useEditor();
-  const bounds = periodBounds(viewMonth, settings.monthStartsOn);
+  const bounds = statementPeriod ?? periodBounds(viewMonth, settings.monthStartsOn);
   const summary = useMemo(() => summarizeRange(transactions, bounds.start, bounds.end), [transactions, bounds.start, bounds.end]);
   const points = useMemo(() => dailyExpensesInRange(transactions, bounds.start, bounds.end), [transactions, bounds.start, bounds.end]);
   const allocation = allocationOf(summary);
-  const compare = useMemo(
-    () => comparePeriods(transactions, viewMonth, settings.monthStartsOn),
-    [transactions, viewMonth, settings.monthStartsOn],
-  );
+  const compare = useMemo<PeriodWindows>(() => {
+    if (!statementPeriod) return comparePeriods(transactions, viewMonth, settings.monthStartsOn);
+    const length = daySpan(statementPeriod.start, statementPeriod.end);
+    const previousEnd = addDays(statementPeriod.start, -1);
+    const previousStart = addDays(previousEnd, 1 - length);
+    const current = summarizeRange(transactions, statementPeriod.start, statementPeriod.end);
+    const previous = summarizeRange(transactions, previousStart, previousEnd);
+    const count = (start: string, end: string) => transactions.filter((tx) => tx.date >= start && tx.date <= end && tx.amountCents > 0).length;
+    return {
+      currentStart: statementPeriod.start,
+      currentEnd: statementPeriod.end,
+      previousStart,
+      previousEnd,
+      partial: false,
+      current,
+      previous,
+      currentRecords: count(statementPeriod.start, statementPeriod.end),
+      previousRecords: count(previousStart, previousEnd),
+    };
+  }, [transactions, statementPeriod, viewMonth, settings.monthStartsOn]);
   const review = monthInReview(compare, summary.savings);
   const upcoming = upcomingInPeriod(settings.recurring, transactions, bounds.start, bounds.end);
   const recent = useMemo(
@@ -75,7 +95,7 @@ export function Overview() {
   const trends = useMemo(() => dailyTrends(transactions, bounds.start, bounds.end), [transactions, bounds.start, bounds.end]);
   const featured = goals[0];
   const saved = featured ? totalSavings(transactions, featured.id) : 0;
-  const label = periodLabel(viewMonth, settings.monthStartsOn);
+  const label = statementPeriod ? `${formatDay(statementPeriod.start)} – ${formatDay(statementPeriod.end)}` : periodLabel(viewMonth, settings.monthStartsOn);
   const deltas = categoryDeltas(compare);
   const insight = deltas.find((row) => row.percent != null && row.previous > 0);
 
@@ -172,9 +192,9 @@ export function Overview() {
       </section>
     ),
     notes: (
-      <section className="grid gap-3 lg:col-span-5" aria-label="Monthly insights">
+      <section className="grid gap-3 lg:col-span-5" aria-label="Statement insights">
         <article className="panel p-4">
-          <h2 className="text-sm text-muted-foreground">Month in Review</h2>
+          <h2 className="text-sm text-muted-foreground">Statement in Review</h2>
           <ReviewLine fact={review[3]} currency={currency} compareLabel={`${formatDay(compare.currentStart)} – ${formatDay(compare.currentEnd)}`} />
         </article>
         <article className="panel p-4">
@@ -246,20 +266,19 @@ export function Overview() {
   return (
     <div className="dashboard-redesign">
       <div className="mb-4">
-        <h2 className="font-display text-3xl font-medium tracking-tight text-foreground">Your month at a glance</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Where the money went.</p>
+        <h2 className="font-display text-3xl font-medium tracking-tight text-foreground">Your statement at a glance</h2>
+        <p className="mt-1 text-sm text-muted-foreground">See where your money went during this statement period.</p>
       </div>
-      <MonthNote
-        viewMonth={viewMonth}
-        currency={currency}
-        remaining={summary.remaining}
-        income={summary.income}
-        expense={summary.expense}
-        recordCount={transactions.filter((tx) => tx.date >= bounds.start && tx.date <= bounds.end).length}
-        reviewCount={transactions.filter((tx) => tx.date >= bounds.start && tx.date <= bounds.end && tx.needsReview).length}
-        budgetCount={settings.budgets.length}
-        top={summary.spentByCategory[0]}
-      />
+      <section className="panel mb-4 p-4" aria-labelledby="statement-period-heading">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 id="statement-period-heading" className="text-sm font-medium">Statement period</h2>
+            <p className="mt-1 text-lg font-medium tabular-nums">{formatDay(bounds.start)} – {formatDay(bounds.end)}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{transactions.filter((tx) => tx.date >= bounds.start && tx.date <= bounds.end).length} transactions</p>
+          </div>
+          <StatementImport />
+        </div>
+      </section>
       <div className="mb-4 max-w-md">
         <a href="/loans" className="panel flex items-center justify-between gap-3 p-4">
           <span>
@@ -310,7 +329,7 @@ function GoalCard({ goal, saved, monthSaved, currency }: { goal: Goal; saved: nu
       <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={`${goal.name} progress`}>
         <div className="meter-fill h-full bg-savings" style={{ transform: `scaleX(${Math.max(0, Math.min(1, ratio))})` }} />
       </div>
-      <p className="mt-2 text-sm text-muted-foreground">This month {formatMoney(monthSaved, currency)}. The bar includes every month.</p>
+      <p className="mt-2 text-sm text-muted-foreground">This statement {formatMoney(monthSaved, currency)}. The bar includes every month.</p>
       <Link to="/goals" className="mt-3 inline-flex h-11 items-center text-sm font-medium text-primary underline-offset-2 hover:underline">
         Manage Goal
       </Link>
@@ -413,7 +432,7 @@ function FlowBar({
   if (allocation.over) {
     return (
       <p className="mt-4 text-sm text-hero-negative">
-        Shortfall: expenses and savings are more than income. Remaining This Month is {formatMoney(summary.remaining, currency)}. The chart is hidden so it doesn’t show a misleading split.
+        Shortfall: expenses and savings are more than income. Remaining for this statement is {formatMoney(summary.remaining, currency)}. The chart is hidden so it doesn’t show a misleading split.
       </p>
     );
   }
