@@ -73,6 +73,13 @@ export function HomePage() {
         </div>
       </section>
 
+      <ul className="home-stats" aria-label="What Clearbook is">
+        <li><strong>No bank link</strong><span>You type every record.</span></li>
+        <li><strong>Your ledger</strong><span>Numbers stay with your account.</span></li>
+        <li><strong>Excel export</strong><span>Download from Settings.</span></li>
+        <li><strong>Any device</strong><span>Sign in and the month is there.</span></li>
+      </ul>
+
       <section className="redesign-feature-section" aria-labelledby="redesign-features-heading">
         <div className="home-section-heading"><span className="home-section-number">01</span><h2 id="redesign-features-heading">The essentials</h2></div>
         <div className="home-step-grid">
