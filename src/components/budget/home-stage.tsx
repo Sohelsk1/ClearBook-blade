@@ -13,7 +13,7 @@ export function HeroUnderline() {
   }, []);
   return (
     <svg className="hero-underline" viewBox="0 0 220 14" aria-hidden="true">
-      <path d="M2 9 C 46 2, 78 13, 118 7 S 176 2, 218 8" fill="none" stroke="#d7f27c" strokeWidth="2.4" strokeLinecap="round">
+      <path d="M2 9 C 46 2, 78 13, 118 7 S 176 2, 218 8" fill="none" stroke="#c5d4a4" strokeWidth="2.4" strokeLinecap="round">
         {draw ? <animate attributeName="stroke-dasharray" from="0 240" to="240 0" dur="1.1s" begin="0s" fill="freeze" /> : null}
       </path>
     </svg>
