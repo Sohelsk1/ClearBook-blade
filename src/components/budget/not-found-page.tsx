@@ -6,7 +6,7 @@ export function NotFoundPage() {
       <div className="w-full">
         <a href="/" className="flex items-center gap-3 rounded-md" aria-label="Clearbook home">
           <Mark className="size-11 shrink-0" />
-          <span className="wordmark text-foreground">ClearBook</span>
+          <span className="wordmark text-foreground">Clearbook</span>
         </a>
         <h1 className="mt-8 font-display text-3xl text-foreground">Page not found</h1>
         <p className="mt-3 text-sm text-muted-foreground">That address is not a page on Clearbook.</p>

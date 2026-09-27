@@ -23,7 +23,7 @@ export function CategoryBudgets() {
   return (
     <section className="panel p-4" aria-labelledby="budget-heading">
       <h3 id="budget-heading" className="text-lg font-medium">Category budgets</h3>
-      <p className="mt-1 text-sm text-muted-foreground">A limit you set. Spending comes from your records.</p>
+      <p className="mt-1 text-sm text-muted-foreground">A limit is a plan. Spending still comes only from the transactions you record.</p>
       <form
         className="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto]"
         onSubmit={(event) => {

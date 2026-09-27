@@ -379,7 +379,7 @@ test("page title, description, and site.host replace the grok.me share card", ()
   try {
     const html =
       '<html><head><title>Clearbook — a personal ledger for income, expenses, and savings</title>' +
-      '<meta name="description" content="A personal ledger for income, expenses, and savings. Sign in to keep your records.">' +
+      '<meta name="description" content="Clearbook is a personal ledger for income, expenses, and savings. Track categories and goals, then export your own records. Sign in to keep them with your account.">' +
       '<link rel="canonical" href="https://clearbookdata.in/">' +
       "</head></html>";
     const out = injectGrokPwaHead(html, {
@@ -401,7 +401,7 @@ test("page title, description, and site.host replace the grok.me share card", ()
     );
     assert.match(
       out,
-      /property="og:description" content="A personal ledger for income, expenses, and savings\. Sign in to keep your records\."/,
+      /property="og:description" content="Clearbook is a personal ledger for income, expenses, and savings\. Track categories and goals, then export your own records\. Sign in to keep them with your account\."/,
     );
     assert.match(out, /name="twitter:description" content="Clearbook is a personal ledger/);
     assert.match(out, /property="og:image" content="https:\/\/clearbookdata\.in\/og\.jpg"/);

@@ -114,7 +114,7 @@ export function EntryDialog({
     <Modal
       title={title}
       placement="sheet"
-      description="Income adds to remaining. Expenses and savings reduce it."
+      description="Income increases Remaining This Month. Expenses and savings reduce it. This is not a bank balance."
       onClose={onClose}
     >
       <form className="mt-5 grid gap-4" onSubmit={submit}>
@@ -150,7 +150,7 @@ export function EntryDialog({
             ) : null}
           </span>
           <input
-            className="field field-amount w-full"
+            className="field w-full"
             inputMode="decimal"
             autoFocus
             autoComplete="off"

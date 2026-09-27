@@ -58,16 +58,16 @@ export type Settings = {
 export const DEFAULT_CARD_ORDER: OverviewCardId[] = [
   "snapshot",
   "stats",
-  "breakdown",
-  "recent",
   "rhythm",
+  "breakdown",
   "goals",
   "notes",
+  "recent",
 ];
 
 export function defaultSettings(): Settings {
   return {
-    theme: "dark",
+    theme: "light",
     monthStartsOn: 1,
     cardOrder: [...DEFAULT_CARD_ORDER],
     budgets: [],
@@ -91,7 +91,6 @@ export function defaultSettings(): Settings {
 type Notice = { text: string; undo: Transaction | null };
 
 export type DisplayRange = { start: string; end: string; custom: boolean };
-export type StatementPeriod = { start: string; end: string };
 
 function rangeFor(month: string, startsOn: number): DisplayRange {
   const bounds = periodBounds(month, startsOn);
@@ -108,7 +107,6 @@ type BudgetState = {
   settings: Settings;
   viewMonth: string;
   displayRange: DisplayRange;
-  statementPeriod: StatementPeriod | null;
   notice: Notice | null;
   beginSession: (userId: string) => number;
   applyRemote: (epoch: number, snapshot: LedgerSnapshot) => void;
@@ -140,7 +138,6 @@ type Persisted = {
   currency?: CurrencyCode;
   settings?: Partial<Settings>;
   viewMonth?: string;
-  statementPeriod?: StatementPeriod | null;
 };
 
 function asGoal(value: Persisted["goal"], fallbackId: string): Goal {
@@ -152,7 +149,7 @@ function asGoal(value: Persisted["goal"], fallbackId: string): Goal {
   };
 }
 
-export function migrateBudget(persisted: unknown): Pick<BudgetState, "transactions" | "goals" | "currency" | "settings" | "viewMonth" | "statementPeriod"> {
+export function migrateBudget(persisted: unknown): Pick<BudgetState, "transactions" | "goals" | "currency" | "settings" | "viewMonth"> {
   const state = (persisted ?? {}) as Persisted;
   const goals = Array.isArray(state.goals)
     ? state.goals
@@ -170,7 +167,6 @@ export function migrateBudget(persisted: unknown): Pick<BudgetState, "transactio
     ...settings.cardOrder.filter((id) => known.has(id)),
     ...DEFAULT_CARD_ORDER.filter((id) => !settings.cardOrder.includes(id)),
   ];
-  if (settings.cardOrder.join(",") === "snapshot,stats,rhythm,breakdown,goals,notes,recent") settings.cardOrder = [...DEFAULT_CARD_ORDER];
   settings.monthStartsOn = Math.min(28, Math.max(1, Math.round(settings.monthStartsOn) || 1));
   const calendar = { ...defaultSettings().calendar, ...(state.settings?.calendar ?? {}) };
   if (calendar.mode !== "daily" && calendar.mode !== "individual") calendar.mode = "daily";
@@ -187,19 +183,10 @@ export function migrateBudget(persisted: unknown): Pick<BudgetState, "transactio
     currency: state.currency === "USD" || state.currency === "EUR" || state.currency === "GBP" || state.currency === "INR" ? state.currency : "INR",
     settings,
     viewMonth: typeof state.viewMonth === "string" && /^\d{4}-\d{2}$/.test(state.viewMonth) ? state.viewMonth : currentMonthKey(),
-    statementPeriod:
-      state.statementPeriod &&
-      typeof state.statementPeriod.start === "string" &&
-      typeof state.statementPeriod.end === "string" &&
-      /^\d{4}-\d{2}-\d{2}$/.test(state.statementPeriod.start) &&
-      /^\d{4}-\d{2}-\d{2}$/.test(state.statementPeriod.end) &&
-      state.statementPeriod.start <= state.statementPeriod.end
-        ? { start: state.statementPeriod.start, end: state.statementPeriod.end }
-        : null,
   };
 }
 
-function blankLedger(): Pick<BudgetState, "transactions" | "goals" | "currency" | "settings" | "viewMonth" | "displayRange" | "statementPeriod" | "notice"> {
+function blankLedger(): Pick<BudgetState, "transactions" | "goals" | "currency" | "settings" | "viewMonth" | "displayRange" | "notice"> {
   const viewMonth = currentMonthKey();
   return {
     transactions: [],
@@ -208,7 +195,6 @@ function blankLedger(): Pick<BudgetState, "transactions" | "goals" | "currency" 
     settings: defaultSettings(),
     viewMonth,
     displayRange: rangeFor(viewMonth, 1),
-    statementPeriod: null,
     notice: null,
   };
 }
@@ -234,7 +220,7 @@ function persistProfile(epoch: number, ownerId: string | null) {
   const state = useBudget.getState();
   const signal = ledgerRequestSignal();
   void saveLedgerProfile({
-    data: { currency: state.currency, settings: state.settings, viewMonth: state.viewMonth, statementPeriod: state.statementPeriod },
+    data: { currency: state.currency, settings: state.settings, viewMonth: state.viewMonth },
     signal,
   }).catch(() => {
     if (signal.aborted || !sameSession(epoch, ownerId)) return;
@@ -264,7 +250,6 @@ export const useBudget = create<BudgetState>()((set, get) => ({
       settings: snapshot.settings,
       viewMonth: snapshot.viewMonth,
       displayRange: rangeFor(snapshot.viewMonth, snapshot.settings.monthStartsOn),
-      statementPeriod: snapshot.statementPeriod ?? null,
     });
   },
   clearSession: () => {
@@ -296,12 +281,7 @@ export const useBudget = create<BudgetState>()((set, get) => ({
       set({ notice: { text: AMOUNT_MESSAGE, undo: null } });
       return;
     }
-    const next = {
-      ...previous,
-      ...patch,
-      id,
-      needsReview: patch.categoryId !== previous.categoryId ? false : previous.needsReview,
-    };
+    const next = { id, ...patch };
     const signal = ledgerRequestSignal();
     set((state) => ({ transactions: state.transactions.map((item) => (item.id === id ? next : item)) }));
     void updateLedgerTransaction({ data: next, signal }).catch(() => {

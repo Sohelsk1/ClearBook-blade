@@ -27,7 +27,7 @@ export const Route = createFileRoute("/transactions")({
     max: typeof search.max === "string" ? search.max : undefined,
     sort: search.sort === "amount" || search.sort === "date" ? search.sort : undefined,
   }),
-  head: () => privatePageHead("Passbook"),
+  head: () => privatePageHead("Transactions"),
   beforeLoad: ({ location }) => gateLocation(location.pathname),
   component: TransactionsPage,
 });

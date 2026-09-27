@@ -4,7 +4,7 @@ export const CANONICAL_ORIGIN = "https://clearbookdata.in";
 export const HOME_TITLE = "Clearbook — a personal ledger for income, expenses, and savings";
 
 export const HOME_DESCRIPTION =
-  "A personal ledger for income, expenses, and savings. Sign in to keep your records.";
+  "Clearbook is a personal ledger for income, expenses, and savings. Track categories and goals, then export your own records. Sign in to keep them with your account.";
 
 export const HOME_H1 = "Your money, made clear.";
 

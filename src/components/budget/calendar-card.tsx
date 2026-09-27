@@ -2,8 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { buildCalendarIcs, type CalendarExportOptions } from "@/lib/budget/calendar-ics";
 import { getCalendarCapability, type CalendarCapability } from "@/lib/budget/calendar-capability";
-import { calendarStatusView } from "@/lib/budget/calendar-status";
 import { ledgerRequestSignal, useBudget } from "@/lib/budget/store";
+
+const FALLBACK: CalendarCapability = {
+  connected: false,
+  lastSync: null,
+  calendarWriteAvailable: false,
+};
 
 export function CalendarCard() {
   const transactions = useBudget((state) => state.transactions);
@@ -46,7 +51,7 @@ export function CalendarCard() {
     [transactions, recurring, options.mode, options.startDate, options.includeAmount, options.includeMerchant, options.includeCategory, options.includeNotes, options.includeReminders, options.reminderTime, options.reminderOffsetDays, options.reminderFrequency, options.timeZone, options.currency, options.origin],
   );
   const sample = built.events[0];
-  const status = calendarStatusView({ capability, checkFailed });
+  const status = capability ?? (checkFailed ? FALLBACK : null);
 
   function patch(partial: Partial<typeof calendar>) {
     patchSettings({ calendar: { ...calendar, ...partial } });
@@ -68,32 +73,38 @@ export function CalendarCard() {
     <section className="panel p-4" id="integrations" aria-labelledby="integrations-heading">
       <p className="text-sm text-muted-foreground">Integrations</p>
       <h3 id="integrations-heading" className="mt-1 text-lg font-medium">Google Calendar</h3>
-      <p className="mt-1 text-sm text-muted-foreground">Not connected. Your ledger stays in Clearbook.</p>
-      <div className="mt-4 grid gap-3 sm:grid-cols-3" aria-live="polite">
-        <Status label="Connection" value={status.connection} />
-        <Status label="Last successful sync" value={status.lastSync} />
-        <Status label="State" value={status.state} />
+      <p className="mt-1 text-sm text-muted-foreground">
+        A dedicated Clearbook calendar is not connected. Your ledger stays in your account, not in Google.
+      </p>
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        <Status label="Connection" value={status ? "Not connected" : "Checking…"} />
+        <Status label="Last successful sync" value="None" />
+        <Status label="State" value="Needs Attention" />
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button type="button" disabled={status.connectDisabled}>{status.connectLabel}</Button>
-        <Button type="button" variant="secondary" disabled={status.syncDisabled}>Sync Now</Button>
-        <Button type="button" variant="ghost" disabled={status.disconnectDisabled}>Disconnect</Button>
+        <Button disabled>Connect Google Calendar</Button>
+        <Button variant="secondary" disabled>Sync Now</Button>
+        <Button variant="ghost" disabled>Disconnect</Button>
       </div>
-      <p className="mt-3 text-sm text-muted-foreground">{status.detail}</p>
+      <p className="mt-3 text-sm text-muted-foreground">
+        Connect, Sync Now, and Disconnect stay off. Google has not confirmed a calendar for this account, so there is nothing to revoke and no Open in Google Calendar link.
+      </p>
 
       <div className="mt-6 border-t border-border pt-4">
-        <h4 className="text-base font-medium">Download a calendar file</h4>
-        <p className="mt-1 text-sm text-muted-foreground">Import it yourself. It does not stay in sync.</p>
+        <h4 className="text-base font-medium">Export only — does not stay synced</h4>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Download a calendar file you can import yourself. Clearbook stays the source of truth. Edits in Google Calendar do not update the ledger, and importing again does not delete old events. Each expense is included once. Savings transfers are not expenses. No guests are added.
+        </p>
         <fieldset className="mt-4">
           <legend className="text-sm font-medium">Expense mode</legend>
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
             <label className="flex gap-2 rounded-md bg-muted p-3 text-sm">
               <input type="radio" name="calendar-mode" checked={calendar.mode === "daily"} onChange={() => patch({ mode: "daily" })} />
-              <span>Daily summary. One event per date.</span>
+              <span>Daily Summary, recommended. One all-day event per date, titled Daily Spending.</span>
             </label>
             <label className="flex gap-2 rounded-md bg-muted p-3 text-sm">
               <input type="radio" name="calendar-mode" checked={calendar.mode === "individual"} onChange={() => patch({ mode: "individual" })} />
-              <span>One event per expense.</span>
+              <span>Individual Expenses. One all-day event per expense. Private notes stay out unless you include them.</span>
             </label>
           </div>
         </fieldset>

@@ -12,13 +12,3 @@ attachments/
 .node_modules.lock
 dist/
 .output/
-
-# Android release signing material and generated bundles
-*.keystore
-*.jks
-*.aab
-*.apk
-android/.gradle/
-android/**/build/
-android/local.properties
-android/.idea/

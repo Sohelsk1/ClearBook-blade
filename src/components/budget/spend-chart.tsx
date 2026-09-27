@@ -4,10 +4,6 @@ import { formatCompactMoney, formatDay, formatMoney, type CurrencyCode, type Day
 
 export type ChartSlice = SpendSlice & { fill: string };
 
-const ACCENT = "#6d8aa8";
-const CATEGORY_COLORS = ["#2563eb", "#f59e0b", "#22c55e", "#7c3aed", "#ec4899", "#06b6d4"];
-const AXIS = { fill: "#71717A", fontSize: 12, fontFamily: "JetBrains Mono, ui-monospace, monospace" };
-
 type SpendChartProps = {
   slices: ChartSlice[];
   total: number;
@@ -15,16 +11,29 @@ type SpendChartProps = {
   onSelect?: (categoryId: string) => void;
 };
 
+type TipPayload = {
+  payload?: ChartSlice;
+};
+
 function prefersReducedMotion() {
   return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-function DarkTip({ active, label, value }: { active?: boolean; label?: string; value?: string }) {
-  if (!active || !label) return null;
+function ChartTip({
+  active,
+  payload,
+  currency,
+}: {
+  active?: boolean;
+  payload?: TipPayload[];
+  currency: CurrencyCode;
+}) {
+  const row = payload?.[0]?.payload;
+  if (!active || !row) return null;
   return (
-    <div className="chart-tip">
-      <p>{label}</p>
-      {value ? <p className="chart-tip-value">{value}</p> : null}
+    <div className="rounded-md bg-foreground px-3 py-2 text-sm text-background shadow-card">
+      <p>{row.label}</p>
+      <p className="font-medium tabular-nums">{formatMoney(row.cents, currency)}</p>
     </div>
   );
 }
@@ -32,82 +41,34 @@ function DarkTip({ active, label, value }: { active?: boolean; label?: string; v
 export function SpendChart({ slices, total, currency, onSelect }: SpendChartProps) {
   const reduceMotion = prefersReducedMotion();
 
-
   return (
-    <div className="chart-surface">
-      <div className="relative mx-auto h-[300px] w-full max-w-[520px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={slices}
-              dataKey="cents"
-              nameKey="label"
-              innerRadius="64%"
-              outerRadius="82%"
-              paddingAngle={slices.length > 1 ? 3 : 0}
-              stroke="var(--color-card)"
-              strokeWidth={2}
-              isAnimationActive={!reduceMotion}
-              animationDuration={700}
-              animationEasing="ease-out"
-              onClick={(slice) => {
-                const id = (slice as { categoryId?: string }).categoryId;
-                if (id && id !== "other") onSelect?.(id);
-              }}
-            >
-              {slices.map((slice, index) => <Cell key={slice.categoryId} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />)}
-            </Pie>
-            <Tooltip content={({ active, payload }) => {
-              const row = payload?.[0]?.payload as ChartSlice | undefined;
-              return <DarkTip active={active} label={row?.label} value={row ? formatMoney(row.cents, currency) : undefined} />;
-            }} />
-          </PieChart>
-        </ResponsiveContainer>
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-10 text-center">
-          <span className="text-xs text-muted-foreground">Spent</span>
-          <span className="figure-center text-foreground">{formatMoney(total, currency)}</span>
-        </div>
-      </div>
-    </div>
-  );
-  return (
-    <div className="chart-surface">
-      <div className="relative h-[300px] w-full">
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={slices}
-              dataKey="cents"
-              nameKey="label"
-              innerRadius="64%"
-              outerRadius="88%"
-              paddingAngle={slices.length > 1 ? 3 : 0}
-              stroke="var(--color-card)"
-              strokeWidth={2}
-              isAnimationActive={!reduceMotion}
-              animationDuration={700}
-              animationEasing="ease-out"
-              onClick={(slice) => {
-                const id = (slice as { categoryId?: string }).categoryId;
-                if (id && id !== "other") onSelect?.(id);
-              }}
-            >
-              {slices.map((slice) => (
-                <Cell key={slice.categoryId} fill={slice.fill} />
-              ))}
-            </Pie>
-            <Tooltip
-              content={({ active, payload }) => {
-                const row = payload?.[0]?.payload as ChartSlice | undefined;
-                return <DarkTip active={active} label={row?.label} value={row ? formatMoney(row.cents, currency) : undefined} />;
-              }}
-            />
-          </PieChart>
-        </ResponsiveContainer>
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-10 text-center">
-          <span className="text-xs text-muted-foreground">Spent</span>
-          <span className="figure-center text-foreground">{formatMoney(total, currency)}</span>
-        </div>
+    <div className="relative mx-auto h-44 w-full max-w-xs">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={slices}
+            dataKey="cents"
+            nameKey="label"
+            innerRadius="64%"
+            outerRadius="88%"
+            paddingAngle={slices.length > 1 ? 2 : 0}
+            stroke="none"
+            isAnimationActive={!reduceMotion}
+            onClick={(slice) => {
+              const id = (slice as { categoryId?: string }).categoryId;
+              if (id && id !== "other") onSelect?.(id);
+            }}
+          >
+            {slices.map((slice) => (
+              <Cell key={slice.categoryId} fill={slice.fill} />
+            ))}
+          </Pie>
+          <Tooltip content={<ChartTip currency={currency} />} />
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-10 text-center">
+        <span className="text-xs text-muted-foreground">Spent</span>
+        <span className="figure-center text-foreground">{formatMoney(total, currency)}</span>
       </div>
     </div>
   );
@@ -122,41 +83,37 @@ type DailyProps = {
 export function DailySpendChart({ points, currency, onSelect }: DailyProps) {
   const reduceMotion = prefersReducedMotion();
   const [picked, setPicked] = useState<DaySpend | null>(null);
-  const [hover, setHover] = useState<number | null>(null);
   const active = picked ?? points.find((point) => point.cents > 0) ?? null;
 
   return (
-    <div className="chart-surface">
-      <div className="h-[300px] w-full">
-        <ResponsiveContainer width="100%" height={300}>
+    <div>
+      <div className="h-48 w-full">
+        <ResponsiveContainer width="100%" height="100%">
           <BarChart data={points} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
-            <CartesianGrid vertical={false} stroke="rgba(90,102,111,0.16)" strokeDasharray="3 3" />
-            <XAxis dataKey="day" tick={AXIS} axisLine={false} tickLine={false} interval={6} />
-            <YAxis width={52} tick={AXIS} axisLine={false} tickLine={false} tickFormatter={(value: number) => formatCompactMoney(value, currency)} />
-            <Tooltip
-              cursor={{ fill: "rgba(255,255,255,0.04)" }}
-              content={({ active, payload }) => {
-                const row = payload?.[0]?.payload as DaySpend | undefined;
-                return (
-                  <DarkTip
-                    active={active}
-                    label={row ? formatDay(row.date) : undefined}
-                    value={row ? (row.cents > 0 ? `${formatMoney(row.cents, currency)} · ${row.count} transaction${row.count === 1 ? "" : "s"}` : "No spending recorded") : undefined}
-                  />
-                );
-              }}
+            <CartesianGrid vertical={false} stroke="var(--color-border)" />
+            <XAxis
+              dataKey="day"
+              tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }}
+              axisLine={false}
+              tickLine={false}
+              interval={6}
             />
+            <YAxis
+              width={52}
+              tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }}
+              axisLine={false}
+              tickLine={false}
+              tickFormatter={(value: number) => formatCompactMoney(value, currency)}
+            />
+            <Tooltip cursor={{ fill: "var(--color-muted)" }} content={() => null} />
             <Bar
               dataKey="cents"
-              radius={[4, 4, 0, 0]}
+              fill="var(--color-negative)"
+              radius={[3, 3, 0, 0]}
               maxBarSize={16}
               isAnimationActive={!reduceMotion}
-              animationDuration={600}
-              animationEasing="ease-out"
-              onMouseLeave={() => setHover(null)}
-              onMouseEnter={(bar, index) => {
+              onMouseEnter={(bar) => {
                 const point = bar?.payload as DaySpend | undefined;
-                setHover(index);
                 if (point) setPicked(point);
               }}
               onClick={(bar) => {
@@ -165,20 +122,16 @@ export function DailySpendChart({ points, currency, onSelect }: DailyProps) {
                 setPicked(point);
                 onSelect?.(point.date);
               }}
-            >
-              {points.map((point, index) => (
-                <Cell key={point.date} fill={ACCENT} fillOpacity={hover === index ? 0.92 : 0.62} />
-              ))}
-            </Bar>
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <p className="mt-3 min-h-10 text-sm" role="status">
+      <p className="mt-2 min-h-10 rounded-md bg-muted px-3 py-2 text-sm" role="status">
         {active ? (
           <>
-            <span className="font-medium text-foreground">{formatDay(active.date)}</span>
+            <span className="font-medium">{formatDay(active.date)}</span>
             <span className="text-muted-foreground"> · </span>
-            <span className="font-semibold tabular-nums text-foreground">
+            <span className="font-medium tabular-nums">
               {active.cents > 0
                 ? `${formatMoney(active.cents, currency)} · ${active.count} transaction${active.count === 1 ? "" : "s"}`
                 : "No spending recorded"}

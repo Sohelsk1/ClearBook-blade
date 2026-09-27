@@ -26,11 +26,11 @@ export function GoalsPage() {
   return (
     <section aria-labelledby="goals-heading">
       <h2 id="goals-heading" className="font-display text-3xl font-medium tracking-tight">Savings Goals</h2>
-      <p className="mt-1 text-sm text-muted-foreground">Money you set aside for a target.</p>
+      <p className="mt-1 text-sm text-muted-foreground">Each contribution is counted once, on the goal you assign it to.</p>
       {goals.length === 0 ? (
         <div className="panel mt-4 px-4 py-8 text-center">
           <p className="text-sm font-medium">Create your first savings goal.</p>
-          <p className="mt-1 text-sm text-muted-foreground">Starts at zero.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Nothing is saved yet. This goal starts at zero.</p>
         </div>
       ) : null}
       <ul className="mt-4 grid gap-4 lg:grid-cols-2">
@@ -64,8 +64,8 @@ export function GoalsPage() {
                 <div className="meter-fill h-full bg-savings" style={{ transform: `scaleX(${Math.max(0, Math.min(1, ratio))})` }} />
               </div>
               <p className="mt-2 text-sm text-muted-foreground">
-                This month {formatMoney(monthSaved, currency)}. The total includes every month.
-                {estimate == null ? "" : ` About ${estimate} period${estimate === 1 ? "" : "s"} left at this pace.`}
+                Saved This Month toward this goal: {formatMoney(monthSaved, currency)}. The total above includes every month.
+                {estimate == null ? " A completion estimate needs a savings contribution in this period." : ` At this period’s pace, about ${estimate} period${estimate === 1 ? "" : "s"} remain. That is only an estimate.`}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Button variant="secondary" onClick={() => setEditing(goal)}>Manage Goal</Button>
@@ -75,7 +75,7 @@ export function GoalsPage() {
                   </Button>
                 ) : null}
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">Add it from Add Transaction, type Savings.</p>
+              <p className="mt-2 text-xs text-muted-foreground">Add a contribution with Add Transaction, choose Savings, and assign this goal.</p>
             </li>
           );
         })}

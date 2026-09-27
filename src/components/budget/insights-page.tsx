@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { TransactionCalendar } from "@/components/budget/transaction-calendar";
+import { CategoryBudgets } from "@/components/budget/category-budgets";
 import {
+  categoryById,
   categoryColor,
   formatDay,
   formatMoney,
@@ -41,25 +42,27 @@ export function InsightsPage() {
   const [showOther, setShowOther] = useState(false);
   const [purchase, setPurchase] = useState("");
   const [purchaseDate, setPurchaseDate] = useState(bounds.start);
+  const [dayDetail, setDayDetail] = useState<string | null>(null);
 
   const parsedPurchase = parseMajorAmount(purchase);
   const upcomingTotal = upcoming.reduce((sum, item) => sum + item.amountCents, 0);
   const before = compare.current.remaining;
   const after = parsedPurchase == null ? null : before - upcomingTotal - parsedPurchase;
 
+  const weeks = calendarWeeks(bounds.start, bounds.end);
 
   return (
     <div className="grid gap-4">
       <header>
-        <h2 className="font-display text-3xl font-medium tracking-tight">Reports</h2>
-        <p className="mt-1 text-sm text-muted-foreground">What you recorded. Estimates are labeled.</p>
+        <h2 className="font-display text-3xl font-medium tracking-tight">Insights</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Recorded activity only. Nothing here is a forecast unless it says estimate.</p>
       </header>
 
       <section className="panel p-4" aria-labelledby="flow-heading">
         <h3 id="flow-heading" className="text-lg font-medium">Money Flow</h3>
-        <p className="mt-1 text-sm text-muted-foreground">Income, expenses, savings, and what is left.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Income splits into expenses, saved, and what remains.</p>
         {compare.current.income <= 0 ? (
-          <p className="mt-3 text-sm text-muted-foreground">No income recorded, so there is no split.</p>
+          <p className="mt-3 text-sm text-muted-foreground">Income is zero, so there is no split to draw.</p>
         ) : compare.current.remaining < 0 ? (
           <p className="mt-3 text-sm text-negative">Shortfall of {formatMoney(Math.abs(compare.current.remaining), currency)}. Expenses and savings exceed income, so percentages are not shown.</p>
         ) : (
@@ -81,7 +84,37 @@ export function InsightsPage() {
         )}
       </section>
 
-      <TransactionCalendar transactions={transactions} currency={currency} viewMonth={viewMonth} />
+      <section className="panel p-4" aria-labelledby="calendar-heading">
+        <h3 id="calendar-heading" className="text-lg font-medium">Spending Calendar</h3>
+        <p className="mt-1 text-sm text-muted-foreground">Color shows recorded expenses only. An empty day is not treated as zero spending.</p>
+        <ul className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
+          <li className="flex items-center gap-1"><span className="size-3 rounded-sm bg-expense/80" /> Recorded spending</li>
+          <li className="flex items-center gap-1"><span className="size-3 rounded-sm bg-positive/30" /> Confirmed no spending</li>
+          <li className="flex items-center gap-1"><span className="size-3 rounded-sm border border-border" /> No confirmed data</li>
+          <li className="flex items-center gap-1"><span className="size-3 rounded-sm bg-muted" /> Future date</li>
+        </ul>
+        <div className="mt-3 grid grid-cols-7 gap-1 text-center text-xs text-muted-foreground">
+          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => <div key={day}>{day}</div>)}
+        </div>
+        <div className="mt-1 grid grid-cols-7 gap-1">
+          {weeks.flat().map((cell, index) =>
+            cell ? (
+              <button
+                key={cell.date}
+                type="button"
+                onClick={() => setDayDetail(cell.date)}
+                className={`h-11 rounded-md text-sm tabular-nums ${cell.className}`}
+                aria-label={`${formatDay(cell.date)} ${cell.detail}`}
+              >
+                {cell.day}
+              </button>
+            ) : (
+              <span key={`pad-${index}`} />
+            ),
+          )}
+        </div>
+        {dayDetail ? <DayDetail date={dayDetail} currency={currency} /> : null}
+      </section>
 
       <section className="panel p-4" aria-labelledby="compare-heading">
         <h3 id="compare-heading" className="text-lg font-medium">Monthly Comparison</h3>
@@ -134,10 +167,12 @@ export function InsightsPage() {
         {compare.previousRecords === 0 ? null : unusual ? <p className="mt-3 text-sm">{unusual}</p> : <p className="mt-3 text-sm text-muted-foreground">No category stands out against the previous period yet.</p>}
       </section>
 
+      <CategoryBudgets />
+
       <section className="panel p-4" aria-labelledby="repeat-heading">
         <h3 id="repeat-heading" className="text-lg font-medium">Possible recurring payments</h3>
-        <p className="mt-1 text-sm text-muted-foreground">These repeat. Confirming one does not add a transaction.</p>
-        {suggestions.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">Needs the same expense in two months.</p> : null}
+        <p className="mt-1 text-sm text-muted-foreground">These repeat in your records. Confirming one schedules it. It is not added as a transaction.</p>
+        {suggestions.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">Not enough repeated history yet. A suggestion needs the same expense in at least two months.</p> : null}
         <ul className="mt-3 space-y-2">
           {suggestions.map((item) => (
             <li key={item.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-muted px-3 py-2 text-sm">
@@ -179,7 +214,7 @@ export function InsightsPage() {
 
       <section className="panel p-4" aria-labelledby="plan-heading">
         <h3 id="plan-heading" className="text-lg font-medium">Plan a Purchase</h3>
-        <p className="mt-1 text-sm text-muted-foreground">Preview only. Nothing is saved.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Estimate only. This does not check a bank account and does not save anything until you add the transaction.</p>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           <label className="grid gap-1 text-sm">
             Amount
@@ -190,7 +225,7 @@ export function InsightsPage() {
             <input className="field" type="date" value={purchaseDate} onChange={(event) => setPurchaseDate(event.target.value)} />
           </label>
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">Also subtracts upcoming payments ({formatMoney(upcomingTotal, currency)}).</p>
+        <p className="mt-2 text-xs text-muted-foreground">Assumes the purchase is an expense on that date, and subtracts confirmed upcoming payments that are not already recorded ({formatMoney(upcomingTotal, currency)}).</p>
         {parsedPurchase != null && after != null ? (
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <div>
@@ -270,3 +305,60 @@ function ReviewCopy({ fact, currency }: { fact: ReturnType<typeof monthInReview>
   );
 }
 
+function DayDetail({ date, currency }: { date: string; currency: CurrencyCode }) {
+  const transactions = useBudget((state) => state.transactions);
+  const expenses = transactions.filter((tx) => tx.date === date && tx.kind === "expense");
+  return (
+    <div className="mt-3 rounded-md bg-muted p-3 text-sm">
+      <p className="font-medium">{formatDay(date)}</p>
+      {expenses.length === 0 ? (
+        <p className="mt-1 text-muted-foreground">No expense was recorded. That is not the same as a confirmed zero.</p>
+      ) : (
+        <ul className="mt-1">
+          {expenses.map((tx) => (
+            <li key={tx.id} className="flex justify-between gap-3">
+              <span>{tx.merchant || tx.note || categoryById(tx.categoryId)?.label}</span>
+              <span className="tabular-nums">{formatMoney(tx.amountCents, currency)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function calendarWeeks(start: string, end: string) {
+  const today = new Date();
+  const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const transactions = useBudget.getState().transactions;
+  const [year, month] = start.split("-").map(Number);
+  const first = new Date(year, month - 1, 1);
+  const days = new Date(year, month, 0).getDate();
+  const cells: ({ date: string; day: number; className: string; detail: string } | null)[] = Array.from({ length: first.getDay() }, () => null);
+  for (let day = 1; day <= days; day += 1) {
+    const date = `${start.slice(0, 7)}-${String(day).padStart(2, "0")}`;
+    const inPeriod = date >= start && date <= end;
+    const expenses = transactions.filter((tx) => tx.date === date && tx.kind === "expense");
+    const other = transactions.some((tx) => tx.date === date && tx.kind !== "expense");
+    const spent = expenses.reduce((sum, tx) => sum + tx.amountCents, 0);
+    let className = "border border-border";
+    let detail = "No confirmed data";
+    if (!inPeriod) {
+      className = "text-faint";
+      detail = "Outside this financial period";
+    } else if (date > todayIso) {
+      className = "bg-muted text-muted-foreground";
+      detail = "Future date";
+    } else if (spent > 0) {
+      className = "bg-expense/80 text-white";
+      detail = "Recorded spending";
+    } else if (other) {
+      className = "bg-positive/20";
+      detail = "Confirmed no spending";
+    }
+    cells.push({ date, day, className, detail });
+  }
+  const weeks = [];
+  for (let index = 0; index < cells.length; index += 7) weeks.push(cells.slice(index, index + 7));
+  return weeks;
+}

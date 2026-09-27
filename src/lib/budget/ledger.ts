@@ -4,7 +4,6 @@ import {
   AMOUNT_MESSAGE,
   CATEGORIES,
   currentMonthKey,
-  isCategoryForKind,
   isPositiveCents,
   type CurrencyCode,
   type Goal,
@@ -12,8 +11,6 @@ import {
   type Kind,
   type Transaction,
 } from "@/lib/budget/model";
-import { classifyStatementText } from "./statement-categories";
-import { calendarJsonWithPeriod, periodFromCalendarJson } from "./statement-period";
 import type {
   BudgetLimit,
   CalendarPrefs,
@@ -22,11 +19,11 @@ import type {
   Settings,
 } from "@/lib/budget/store";
 
-const CARD_ORDER: OverviewCardId[] = ["snapshot", "stats", "breakdown", "recent", "rhythm", "goals", "notes"];
+const CARD_ORDER: OverviewCardId[] = ["snapshot", "stats", "rhythm", "breakdown", "goals", "notes", "recent"];
 
 function emptySettings(): Settings {
   return {
-    theme: "dark",
+    theme: "light",
     monthStartsOn: 1,
     cardOrder: [...CARD_ORDER],
     budgets: [],
@@ -53,7 +50,6 @@ export type LedgerSnapshot = {
   currency: CurrencyCode;
   settings: Settings;
   viewMonth: string;
-  statementPeriod: { start: string; end: string } | null;
 };
 
 const KINDS = new Set<Kind>(["income", "expense", "savings"]);
@@ -75,13 +71,12 @@ export function parseTransaction(value: unknown): Transaction | null {
   if (typeof kind !== "string" || !KINDS.has(kind as Kind)) return null;
   if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
   if (typeof amount !== "number" || !isPositiveCents(amount)) return null;
-  if (typeof categoryId !== "string" || !isCategoryForKind(categoryId, kind as Kind)) return null;
+  if (typeof categoryId !== "string" || !CATEGORY_IDS.has(categoryId)) return null;
   if (typeof row.id !== "string" || row.id.length < 4 || row.id.length > 80) return null;
   const note = typeof row.note === "string" ? row.note.trim().slice(0, 80) : "";
   const merchant = typeof row.merchant === "string" && row.merchant.trim() ? row.merchant.trim().slice(0, 60) : undefined;
   const goalId = typeof row.goalId === "string" && row.goalId ? row.goalId.slice(0, 80) : undefined;
-  const needsReview = row.needsReview === true;
-  return { id: row.id, kind: kind as Kind, amountCents: amount, categoryId, note, date, merchant, goalId, ...(needsReview ? { needsReview: true } : {}) };
+  return { id: row.id, kind: kind as Kind, amountCents: amount, categoryId, note, date, merchant, goalId };
 }
 
 export type TxSplit = { categoryId: string; amountCents: number };
@@ -184,13 +179,12 @@ function parseSettings(value: unknown): Settings {
   const base = emptySettings();
   const row = asRecord(value);
   if (!row) return base;
-  const theme = row.theme === "light" ? "light" : "dark";
+  const theme = row.theme === "dark" ? "dark" : "light";
   const monthStartsOn = typeof row.monthStartsOn === "number" ? Math.min(28, Math.max(1, Math.round(row.monthStartsOn))) : 1;
   const cardOrder = Array.isArray(row.cardOrder)
     ? (row.cardOrder.filter((id) => CARD_ORDER.includes(id as OverviewCardId)) as OverviewCardId[])
     : [];
   const order = [...cardOrder, ...CARD_ORDER.filter((id) => !cardOrder.includes(id))];
-  if (order.join(",") === "snapshot,stats,rhythm,breakdown,goals,notes,recent") order.splice(0, order.length, ...CARD_ORDER);
   const budgets = Array.isArray(row.budgets)
     ? row.budgets.flatMap((item) => {
         const budget = asRecord(item);
@@ -253,7 +247,6 @@ type TxRow = {
   merchant: string | null;
   goal_id: string | null;
   tx_date: string;
-  needs_review?: boolean | null;
 };
 
 type GoalRow = { id: string; name: string; target_cents: number; icon: string };
@@ -278,7 +271,6 @@ function txFromRow(row: TxRow): Transaction {
     merchant: row.merchant ?? undefined,
     goalId: row.goal_id ?? undefined,
     date: String(row.tx_date).slice(0, 10),
-    ...(row.needs_review ? { needsReview: true } : {}),
   };
 }
 
@@ -287,44 +279,8 @@ async function db() {
   return getSql();
 }
 
-async function backfillImportedCategories(sql: Awaited<ReturnType<typeof db>>, userId: string) {
-  const rows = await sql<{
-    id: string;
-    kind: string;
-    category_id: string;
-    note: string;
-    merchant: string | null;
-    needs_review: boolean | null;
-  }>`
-    select id, kind, category_id, note, merchant, needs_review
-    from ledger_transactions
-    where user_id = ${userId}
-      and category_locked = false
-      and id like 'stmt-idfc-%'
-      and (
-        (kind = 'expense' and category_id = 'personal')
-        or (kind = 'income' and category_id = 'other-in')
-      )
-  `;
-  for (const row of rows) {
-    if (row.kind !== "income" && row.kind !== "expense") continue;
-    const guess = classifyStatementText(row.kind, `${row.merchant ?? ""} ${row.note}`);
-    if (!isCategoryForKind(guess.categoryId, row.kind)) continue;
-    if (guess.categoryId === row.category_id && guess.needsReview === Boolean(row.needs_review)) continue;
-    await sql`
-      update ledger_transactions
-      set category_id = ${guess.categoryId}, needs_review = ${guess.needsReview}
-      where user_id = ${userId}
-        and id = ${row.id}
-        and category_locked = false
-        and category_id = ${row.category_id}
-    `;
-  }
-}
-
 async function readSnapshot(userId: string): Promise<LedgerSnapshot> {
   const sql = await db();
-  await backfillImportedCategories(sql, userId);
   const defaults = emptySettings();
   const month = currentMonthKey();
   await sql`
@@ -332,7 +288,7 @@ async function readSnapshot(userId: string): Promise<LedgerSnapshot> {
     values (
       ${userId},
       'INR',
-      'dark',
+      'light',
       1,
       ${JSON.stringify(defaults.cardOrder)},
       '[]',
@@ -343,7 +299,7 @@ async function readSnapshot(userId: string): Promise<LedgerSnapshot> {
     on conflict (user_id) do nothing
   `;
   const transactions = await sql<TxRow>`
-    select id, kind, amount_cents, category_id, note, merchant, goal_id, tx_date, needs_review
+    select id, kind, amount_cents, category_id, note, merchant, goal_id, tx_date
     from ledger_transactions
     where user_id = ${userId}
     order by tx_date desc, id desc
@@ -380,7 +336,6 @@ async function readSnapshot(userId: string): Promise<LedgerSnapshot> {
     currency: parseCurrency(profile?.currency),
     settings,
     viewMonth: profile?.view_month && /^\d{4}-\d{2}$/.test(profile.view_month) ? profile.view_month : month,
-    statementPeriod: periodFromCalendarJson(profile?.calendar),
   };
 }
 
@@ -456,8 +411,6 @@ export const updateLedgerTransaction = createServerFn({ method: "POST" })
       update ledger_transactions
       set kind = ${data.kind},
           amount_cents = ${data.amountCents},
-          category_locked = case when category_id is distinct from ${data.categoryId} then true else category_locked end,
-          needs_review = case when category_id is distinct from ${data.categoryId} then false else needs_review end,
           category_id = ${data.categoryId},
           note = ${data.note},
           merchant = ${data.merchant ?? null},
@@ -543,10 +496,6 @@ export const saveLedgerProfile = createServerFn({ method: "POST" })
   })
   .handler(async ({ context, data }) => {
     const sql = await db();
-    const existingProfile = await sql<{ calendar: string }>`
-      select calendar from ledger_profiles where user_id = ${context.userId}
-    `;
-    const statementPeriod = periodFromCalendarJson(existingProfile[0]?.calendar);
     await sql`
       insert into ledger_profiles (user_id, currency, theme, month_starts_on, card_order, budgets, recurring, calendar, view_month)
       values (
@@ -557,7 +506,7 @@ export const saveLedgerProfile = createServerFn({ method: "POST" })
         ${JSON.stringify(data.settings.cardOrder)},
         ${JSON.stringify(data.settings.budgets)},
         ${JSON.stringify(data.settings.recurring)},
-        ${calendarJsonWithPeriod(data.settings.calendar, statementPeriod)},
+        ${JSON.stringify(data.settings.calendar)},
         ${data.viewMonth}
       )
       on conflict (user_id) do update set
@@ -571,113 +520,6 @@ export const saveLedgerProfile = createServerFn({ method: "POST" })
         view_month = excluded.view_month
     `;
     return data;
-  });
-
-
-function statementReference(note: string): string {
-  return /(?:UPI\s*\/\s*(?:DR|CR)\s*\/\s*\d+|IMPS\/[A-Z0-9]+|NEFT\/[A-Z0-9]+|IFT\/\d+|POS-VISA\/[^/]*\/\d+|ATM-NFS\/[^/]*\/[^/]*\/\d+|\b\d{10,}\b)/i.exec(note)?.[0]?.toUpperCase().replace(/\s+/g, "") ?? "";
-}
-
-/** Import only validated transactions belonging to the signed-in account. */
-export const importStatementTransactions = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
-  .validator((input: unknown) => {
-    const row = asRecord(input);
-    if (!row) throw new Error("Invalid statement");
-    if (!Array.isArray(row.transactions) || row.transactions.length === 0 || row.transactions.length > 300) throw new Error("Invalid statement size");
-    const transactions = row.transactions.map((value: unknown) => {
-      const tx = parseTransaction(value);
-      if (!tx || !tx.id.startsWith("stmt-idfc-") || tx.kind === "savings" || tx.goalId) throw new Error("Invalid statement row");
-      if (tx.kind !== "income" && tx.kind !== "expense") throw new Error("Invalid statement row");
-      const guess = classifyStatementText(tx.kind, `${tx.merchant ?? ""} ${tx.note}`);
-      return { ...tx, categoryId: guess.categoryId, needsReview: guess.needsReview || tx.needsReview === true };
-    });
-    return { transactions };
-  })
-  .handler(async ({ context, data }) => {
-    const sql = await db();
-    const existing = await sql<TxRow>`
-      select id, kind, amount_cents, category_id, note, merchant, goal_id, tx_date
-      from ledger_transactions where user_id = ${context.userId}
-    `;
-    const seenIds = new Set(existing.map((row) => row.id));
-    const seenReferences = new Set(existing.flatMap((row) => {
-      const reference = statementReference(row.note);
-      return reference ? [`${row.kind}:${row.amount_cents}:${reference}`] : [];
-    }));
-    let added = 0;
-    let skipped = 0;
-    let needsReview = 0;
-    for (const tx of data.transactions) {
-      const reference = statementReference(tx.note);
-      const key = reference ? `${tx.kind}:${tx.amountCents}:${reference}` : "";
-      // Legacy manual entries can have a bank reference despite a random id.
-      if (seenIds.has(tx.id) || (key && seenReferences.has(key)) || (reference && existing.some((row) => row.kind === tx.kind && Number(row.amount_cents) === tx.amountCents && row.note.includes(reference.match(/\d{10,}/)?.[0] ?? "\u0000")))) { skipped++; continue; }
-      const inserted = await sql<{ id: string }>`
-        insert into ledger_transactions (id, user_id, kind, amount_cents, category_id, note, merchant, goal_id, tx_date, needs_review, category_locked)
-        values (${tx.id}, ${context.userId}, ${tx.kind}, ${tx.amountCents}, ${tx.categoryId},
-                ${tx.note}, ${tx.merchant ?? null}, null, ${tx.date}, ${tx.needsReview === true}, false)
-        on conflict (user_id, id) do nothing returning id
-      `;
-      if (inserted.length) { added++; if (tx.needsReview) needsReview++; seenIds.add(tx.id); if (key) seenReferences.add(key); }
-      else skipped++;
-    }
-    const dates = data.transactions.map((tx) => tx.date).filter((date) => /^\d{4}-\d{2}-\d{2}$/.test(date)).sort();
-    const period = dates.length ? { start: dates[0], end: dates[dates.length - 1] } : null;
-    if (period) {
-      await readSnapshot(context.userId);
-      const profiles = await sql<{ calendar: string }>`
-        select calendar from ledger_profiles where user_id = ${context.userId}
-      `;
-      let stored: unknown = {};
-      try {
-        stored = JSON.parse(profiles[0]?.calendar || "{}");
-      } catch {
-        stored = {};
-      }
-      await sql`
-        update ledger_profiles
-        set calendar = ${calendarJsonWithPeriod(stored, period)}
-        where user_id = ${context.userId}
-      `;
-    }
-    return { added, skipped, needsReview, period, snapshot: await readSnapshot(context.userId) };
-  });
-
-
-/** Delete only this account's ledger data. Confirmation is enforced server-side. */
-export const resetLedgerData = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
-  .validator((input: unknown) => {
-    if (asRecord(input)?.confirm !== "RESET") throw new Error("Reset must be confirmed");
-    return true;
-  })
-  .handler(async ({ context }): Promise<LedgerSnapshot> => {
-    const sql = await db();
-    const defaults = emptySettings();
-    const month = currentMonthKey();
-    // One statement keeps the ledger reset atomic on both Neon and PGLite.
-    await sql`
-      with deleted_transactions as (
-        delete from ledger_transactions where user_id = ${context.userId} returning id
-      ), deleted_goals as (
-        delete from ledger_goals where user_id = ${context.userId} returning id
-      ), deleted_exports as (
-        delete from ledger_export_log where user_id = ${context.userId} returning id
-      ), reset_profile as (
-        update ledger_profiles
-        set budgets = '[]', recurring = '[]', calendar = ${JSON.stringify(defaults.calendar)},
-            view_month = ${month}
-        where user_id = ${context.userId}
-        returning user_id
-      )
-      select
-        (select count(*) from deleted_transactions) as transactions_deleted,
-        (select count(*) from deleted_goals) as goals_deleted,
-        (select count(*) from deleted_exports) as exports_deleted,
-        (select count(*) from reset_profile) as profiles_reset
-    `;
-    return readSnapshot(context.userId);
   });
 
 export const importOwnedLedger = createServerFn({ method: "POST" })

@@ -30,8 +30,7 @@
  * a verified id via `@/lib/auth/middleware`.
  */
 import { betterAuth } from "better-auth";
-import { bearer, emailOTP, genericOAuth } from "better-auth/plugins";
-import { deliverSignupOtp, readMailConfig } from "../mail/deliver.server";
+import { bearer, genericOAuth } from "better-auth/plugins";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { getCookie } from "@tanstack/react-start/server";
 import { randomBytes } from "node:crypto";
@@ -223,15 +222,6 @@ export const auth = betterAuth({
   // local loopback variants, or clients get "Invalid origin".
   trustedOrigins,
 
-  rateLimit: {
-    enabled: true,
-    customRules: {
-      "/sign-up/email": { window: 600, max: 5 },
-      "/email-otp/send-verification-otp": { window: 600, max: 3 },
-      "/email-otp/verify-email": { window: 600, max: 10 },
-    },
-  },
-
   // Encrypt broker-issued OAuth tokens at rest, and treat the broker's upstreams
   // as trusted first-party identities. The broker owns identity and X emails are
   // synthetic/unverified, so WITHOUT this a login can fail with
@@ -258,16 +248,8 @@ export const auth = betterAuth({
   // flicker-prevention guidance (gate on `isPending`; SSR the session).
   session: { cookieCache: { enabled: true, maxAge: 300 } },
 
-  // Email codes are required only when mail can actually be sent. Without
-  // Resend or SMTP, requiring verification would lock password accounts out.
-  ...(emailAndPasswordEnabled
-    ? {
-        emailAndPassword: {
-          enabled: true,
-          ...(readMailConfig() ? { requireEmailVerification: true, autoSignIn: false } : {}),
-        },
-      }
-    : {}),
+  // Local email/password — toggled only via `./email-password` (not a plugin).
+  ...(emailAndPasswordEnabled ? { emailAndPassword: { enabled: true } } : {}),
 
   // `__Host-` prefixed cookies: the browser REFUSES any same-named cookie that
   // carries a `Domain` attribute, so a sibling `*.grok.me` app cannot "toss" a
@@ -288,18 +270,6 @@ export const auth = betterAuth({
   },
 
   plugins: [
-    emailOTP({
-      otpLength: 6,
-      expiresIn: 600,
-      allowedAttempts: 5,
-      storeOTP: "hashed",
-      sendVerificationOnSignUp: true,
-      overrideDefaultEmailVerification: true,
-      async sendVerificationOTP({ email, otp, type }) {
-        if (type !== "email-verification") return;
-        await deliverSignupOtp(email, otp);
-      },
-    }),
     gateIdentitySessions(),
 
     // One genericOAuth provider per upstream (when auth is on), all federating
