@@ -11,6 +11,8 @@ export type Transaction = {
   date: string;
   merchant?: string;
   goalId?: string;
+  /** True when a statement import could not confidently choose a category. */
+  needsReview?: boolean;
 };
 
 export type GoalIcon = "shield" | "home" | "plane" | "gift";
@@ -75,6 +77,10 @@ export const DEFAULT_GOAL: Goal = {
 
 export function categoriesFor(kind: Kind): Category[] {
   return CATEGORIES.filter((category) => category.kind === kind);
+}
+
+export function isCategoryForKind(categoryId: string, kind: Kind): boolean {
+  return CATEGORIES.some((category) => category.id === categoryId && category.kind === kind);
 }
 
 export function categoryById(id: string): Category | undefined {
