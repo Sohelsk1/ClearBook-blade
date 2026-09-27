@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, Menu, Plus, LayoutDashboard, List, Settings, Target, ChartNoAxesCombined, Landmark, X, Moon, Sun } from "lucide-react";
+import { ChevronLeft, ChevronRight, Menu, Plus, LayoutDashboard, List, Settings, Target, ChartNoAxesCombined, Landmark, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EntryDialog, draftFromTransaction, type Draft } from "@/components/budget/entry-dialog";
 import {
@@ -35,7 +35,6 @@ export function FrameInner({ children, userId }: { children: ReactNode; userId: 
   const viewMonth = useBudget((state) => state.viewMonth);
   const setViewMonth = useBudget((state) => state.setViewMonth);
   const settings = useBudget((state) => state.settings);
-  const patchSettings = useBudget((state) => state.patchSettings);
   const goals = useBudget((state) => state.goals);
   const notice = useBudget((state) => state.notice);
   const undoDelete = useBudget((state) => state.undoDelete);
@@ -85,11 +84,8 @@ export function FrameInner({ children, userId }: { children: ReactNode; userId: 
         <SvgTheme />
         <aside id="app-sidebar" className={navOpen ? "app-sidebar is-open" : "app-sidebar"} aria-label="Main navigation">
           <Link to="/dashboard" className="app-sidebar-brand" aria-label="Clearbook dashboard">
-            <Mark className="size-9 shrink-0" />
-            <span className="app-brand-lockup">
-              <span className="wordmark">ClearBook</span>
-              <span className="app-brand-kicker">Personal ledger</span>
-            </span>
+            <Mark className="size-8 shrink-0" />
+            <span className="wordmark">ClearBook</span>
           </Link>
           <button type="button" className="app-sidebar-close" aria-label="Close navigation" onClick={() => setNavOpen(false)}>
             <X className="size-4" aria-hidden="true" />
@@ -100,8 +96,8 @@ export function FrameInner({ children, userId }: { children: ReactNode; userId: 
                 {index === NAV.length - 1 ? <hr className="app-sidebar-rule" /> : null}
                 <Link to={item.to} aria-current={item.active(pathname) ? "page" : undefined}
                   className={item.active(pathname) ? "app-nav-link app-nav-active" : "app-nav-link"}>
-                  <span className="app-nav-badge"><item.icon className="size-[18px] shrink-0" strokeWidth={1.75} aria-hidden="true" /></span>
-                  <span className="app-nav-label">{item.label}</span>
+                  <item.icon className="size-[18px] shrink-0" strokeWidth={1.5} aria-hidden="true" />
+                  {item.label}
                 </Link>
               </span>
             ))}
@@ -135,14 +131,6 @@ export function FrameInner({ children, userId }: { children: ReactNode; userId: 
                 <Button variant="ghost" size="icon" aria-label="Next month" onClick={() => setViewMonth(shiftMonth(viewMonth, 1))}><ChevronRight className="size-4" /></Button>
               </div> : null}
               <Button className="app-add-button" onClick={api.openCreate}><Plus className="size-4" /> <span className="app-add-label">Add transaction</span></Button>
-              <button
-                type="button"
-                className="app-theme-toggle"
-                aria-label={settings.theme === "dark" ? "Switch to light" : "Switch to dark"}
-                onClick={() => patchSettings({ theme: settings.theme === "dark" ? "light" : "dark" })}
-              >
-                {settings.theme === "dark" ? <Sun className="size-[18px]" /> : <Moon className="size-[18px]" />}
-              </button>
               <div className="app-mobile-user"><UserButton /></div>
             </div>
           </header>
