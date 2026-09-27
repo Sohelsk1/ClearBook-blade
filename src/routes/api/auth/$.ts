@@ -1,10 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "@/lib/auth/server";
-import { ensurePasswordResetDelivery } from "@/lib/mail/deliver.server";
+import { auth, ensureAuthSchema } from "@/lib/auth/server";
 
 async function handle(request: Request) {
-  await ensurePasswordResetDelivery(auth);
-  return auth.handler(request);
+  await ensureAuthSchema();
+  try {
+    return await auth.handler(request);
+  } catch (error) {
+    console.error("[clearbook] Better Auth request failed:", error);
+    throw error;
+  }
 }
 
 export const Route = createFileRoute("/api/auth/$")({
