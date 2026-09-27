@@ -30,6 +30,7 @@
  * a verified id via `@/lib/auth/middleware`.
  */
 import { betterAuth } from "better-auth";
+import { getMigrations } from "better-auth/db/migration";
 import { bearer, genericOAuth } from "better-auth/plugins";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { getCookie } from "@tanstack/react-start/server";
@@ -40,6 +41,7 @@ import { emailAndPasswordEnabled } from "./email-password";
 import { GATE_PROVIDER_ID, gateIdentitySessions } from "./gate-session.server";
 import { GROK_PROVIDERS } from "./providers";
 import { pgliteDialect } from "./pglite-dialect";
+import { deliverResetEmail } from "@/lib/mail/deliver.server";
 import {
   GROK_ISSUER_DEFAULT,
   PREVIEW_ALLOWED_HOSTS,
@@ -250,7 +252,17 @@ export const auth = betterAuth({
   session: { cookieCache: { enabled: true, maxAge: 300 } },
 
   // Local email/password — toggled only via `./email-password` (not a plugin).
-  ...(emailAndPasswordEnabled ? { emailAndPassword: { enabled: true } } : {}),
+  ...(emailAndPasswordEnabled
+    ? {
+        emailAndPassword: {
+          enabled: true,
+          sendResetPassword: async (data: { user: { id: string; email: string; name?: string | null }; url: string; token: string }) => {
+            await deliverResetEmail(data.user, data.url, data.token);
+          },
+          revokeSessionsOnPasswordReset: true,
+        },
+      }
+    : {}),
 
   // `__Host-` prefixed cookies: the browser REFUSES any same-named cookie that
   // carries a `Domain` attribute, so a sibling `*.grok.me` app cannot "toss" a
@@ -298,3 +310,26 @@ export function readSessionToken(): string | null {
 // Re-exported for convenience; the array lives in the dependency-free
 // `providers.ts` so the client can import it too.
 export { GROK_PROVIDERS } from "./providers";
+
+
+/**
+ * Ensure the live Better Auth database matches the current auth configuration.
+ * Vercel can run a serverless function before the build-time migration has reached
+ * the configured database (or after a database was changed independently). Better
+ * Auth documents this programmatic migration path for serverless deployments.
+ */
+const globalAuthMigration = globalThis as typeof globalThis & {
+  __clearbookAuthMigration__?: Promise<void>;
+};
+
+export function ensureAuthSchema(): Promise<void> {
+  globalAuthMigration.__clearbookAuthMigration__ ??= (async () => {
+    const { runMigrations } = await getMigrations(auth.options);
+    await runMigrations();
+  })().catch((error) => {
+    globalAuthMigration.__clearbookAuthMigration__ = undefined;
+    console.error("[clearbook] Better Auth schema migration failed:", error);
+    throw error;
+  });
+  return globalAuthMigration.__clearbookAuthMigration__;
+}
