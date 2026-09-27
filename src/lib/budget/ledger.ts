@@ -550,7 +550,7 @@ export const saveLedgerProfile = createServerFn({ method: "POST" })
         ${JSON.stringify(data.settings.cardOrder)},
         ${JSON.stringify(data.settings.budgets)},
         ${JSON.stringify(data.settings.recurring)},
-        ${calendarJsonWithPeriod(data.settings.calendar, statementPeriod)},
+        ${JSON.stringify(data.settings.calendar)},
         ${data.viewMonth}
       )
       on conflict (user_id) do update set
