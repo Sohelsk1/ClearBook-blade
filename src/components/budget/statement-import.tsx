@@ -18,7 +18,7 @@ function extractStatementCounterparty(description: string): string {
 async function asTransaction(row: StatementRow, bank: string): Promise<Transaction> {
   const fingerprint = `${row.date}|${row.kind}|${row.amountCents}|${row.balanceCents}|${row.description}`;
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(fingerprint));
-  const id = "stmt-idfc-" + [...new Uint8Array(digest)].slice(0, 16).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  const id = "stmt-" + [...new Uint8Array(digest)].slice(0, 16).map((byte) => byte.toString(16).padStart(2, "0")).join("");
   const merchant = extractStatementCounterparty(row.description);
   const guess = classifyStatementText(row.kind, `${merchant} ${row.description}`);
   return {
