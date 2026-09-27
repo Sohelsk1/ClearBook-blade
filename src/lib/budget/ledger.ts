@@ -298,7 +298,7 @@ async function backfillImportedCategories(sql: Awaited<ReturnType<typeof db>>, u
     from ledger_transactions
     where user_id = ${userId}
       and category_locked = false
-      and id like 'stmt-idfc-%'
+      and id like 'stmt-%'
       and (
         (kind = 'expense' and category_id = 'personal')
         or (kind = 'income' and category_id = 'other-in')
@@ -580,7 +580,7 @@ export const importStatementTransactions = createServerFn({ method: "POST" })
     if (!Array.isArray(row.transactions) || row.transactions.length === 0 || row.transactions.length > 300) throw new Error("Invalid statement size");
     const transactions = row.transactions.map((value: unknown) => {
       const tx = parseTransaction(value);
-      if (!tx || !tx.id.startsWith("stmt-idfc-") || tx.kind === "savings" || tx.goalId) throw new Error("Invalid statement row");
+      if (!tx || !tx.id.startsWith("stmt-") || tx.kind === "savings" || tx.goalId) throw new Error("Invalid statement row");
       if (tx.kind !== "income" && tx.kind !== "expense") throw new Error("Invalid statement row");
       const guess = classifyStatementText(tx.kind, `${tx.merchant ?? ""} ${tx.note}`);
       return { ...tx, categoryId: guess.categoryId, needsReview: guess.needsReview || tx.needsReview === true };
