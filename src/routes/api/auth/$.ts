@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { auth, ensureAuthSchema } from "@/lib/auth/server";
+import { auth } from "@/lib/auth/server";
+import { ensurePasswordResetDelivery } from "@/lib/mail/deliver.server";
 
 async function handle(request: Request) {
-  await ensureAuthSchema();
+  await ensurePasswordResetDelivery(auth);
   try {
     return await auth.handler(request);
   } catch (error) {
