@@ -73,13 +73,6 @@ export function HomePage() {
         </div>
       </section>
 
-      <ul className="home-stats" aria-label="What Clearbook is">
-        <li><strong>No bank link</strong><span>You type every record.</span></li>
-        <li><strong>Your ledger</strong><span>Numbers stay with your account.</span></li>
-        <li><strong>Excel export</strong><span>Download from Settings.</span></li>
-        <li><strong>Any device</strong><span>Sign in and the month is there.</span></li>
-      </ul>
-
       <section className="redesign-feature-section" aria-labelledby="redesign-features-heading">
         <div className="home-section-heading"><span className="home-section-number">01</span><h2 id="redesign-features-heading">The essentials</h2></div>
         <div className="home-step-grid">
@@ -179,7 +172,7 @@ function MonthPreview() {
           <div className="month-preview-visual">
             <div
               className="month-preview-ring"
-              style={{ background: `conic-gradient(#EF4444 0% ${Math.max(0, expenseShare - 1.2)}%, transparent ${Math.max(0, expenseShare - 1.2)}% ${expenseShare}%, #3B82F6 ${expenseShare}% ${expenseShare + Math.max(0, savingsShare - 1.2)}%, transparent ${expenseShare + Math.max(0, savingsShare - 1.2)}% ${expenseShare + savingsShare}%, #10B981 ${expenseShare + savingsShare}% 100%)` }}
+              style={{ background: `conic-gradient(#c17d88 0% ${Math.max(0, expenseShare - 1.2)}%, transparent ${Math.max(0, expenseShare - 1.2)}% ${expenseShare}%, #6d8aa8 ${expenseShare}% ${expenseShare + Math.max(0, savingsShare - 1.2)}%, transparent ${expenseShare + Math.max(0, savingsShare - 1.2)}% ${expenseShare + savingsShare}%, #6d9a86 ${expenseShare + savingsShare}% 100%)` }}
               role="img"
               aria-label={`Example allocation of ${money(income)} income: ${money(expenses)} expenses, ${money(savings)} savings, and ${money(remaining)} remaining`}
             >
