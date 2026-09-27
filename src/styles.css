@@ -383,3 +383,32 @@
     transition: none;
   }
 }
+
+/* Restored statement / score / credit surfaces */
+.statement-pdf-button{display:inline-flex;min-height:44px;align-items:center;justify-content:center;gap:8px;border-radius:8px;border:1px solid var(--border);background:var(--foreground);color:var(--background);padding:0 14px}
+.statement-pdf-button:disabled{opacity:.55;cursor:not-allowed}
+.reset-data-button{min-height:44px}
+.saver-score{overflow:hidden}
+.saver-gauge{position:relative}
+.saver-gauge-readout{margin-top:-54px;position:relative;text-align:center}
+.saver-deck{margin:20px auto 0;max-width:520px}
+.saver-alert{border:1px solid var(--border);border-radius:12px;padding:14px;text-align:left}
+.saver-alert.is-good{background:color-mix(in srgb,var(--color-positive) 8%,var(--color-card))}
+.saver-alert.is-warn{background:color-mix(in srgb,var(--color-savings) 8%,var(--color-card))}
+.saver-alert.is-bad{background:color-mix(in srgb,var(--color-negative) 8%,var(--color-card))}
+.saver-deck-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:10px}
+.saver-nav-btn{display:grid;place-items:center;width:32px;height:32px;border:1px solid var(--border);border-radius:999px}
+.saver-dot{width:7px;height:7px;border-radius:999px;background:var(--border)}
+.saver-dot.is-on{background:var(--foreground)}
+.saver-whatif{margin-top:10px;font-size:12px;font-weight:600;text-decoration:underline}
+.loans-page .loans-drop{display:grid;place-items:center;border:1px dashed var(--border);border-radius:12px;padding:28px;cursor:pointer;text-align:center}
+.loans-page .loans-drop.is-over{background:var(--muted)}
+.loans-tip{padding:12px;border:1px solid var(--border);border-radius:10px;font-size:14px}
+.loans-status{font-size:12px;font-weight:600}
+.loans-status.is-overdue{color:var(--color-negative)}
+.loans-status.is-active{color:var(--color-positive)}
+.loans-bar{display:block;height:100%;border-radius:999px;background:var(--color-positive)}
+.loans-bar.is-mid{background:var(--color-savings)}
+.loans-bar.is-high{background:var(--color-negative)}
+.tx-review{display:inline-block;margin-left:6px;border-radius:999px;background:var(--muted);padding:2px 6px;font-size:10px}
+.report-download{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--border);border-radius:12px;padding:14px;text-align:left}
