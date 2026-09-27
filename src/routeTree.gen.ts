@@ -20,6 +20,7 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as GoalsRouteImport } from './routes/goals'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as LoansRouteImport } from './routes/loans'
 import { Route as RecordIncomeRouteImport } from './routes/record-income'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -85,6 +86,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoansRoute = LoansRouteImport.update({
+  id: '/loans',
+  path: '/loans',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RecordIncomeRoute = RecordIncomeRouteImport.update({
   id: '/record-income',
   path: '/record-income',
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/goals': typeof GoalsRoute
   '/insights': typeof InsightsRoute
   '/login': typeof LoginRoute
+  '/loans': typeof LoansRoute
   '/record-income': typeof RecordIncomeRoute
   '/reports': typeof ReportsRoute
   '/reset-password': typeof ResetPasswordRouteWithChildren
@@ -458,6 +465,7 @@ const rootRouteChildren: RootRouteChildren = {
   GoalsRoute: GoalsRoute,
   InsightsRoute: InsightsRoute,
   LoginRoute: LoginRoute,
+  LoansRoute: LoansRoute,
   RecordIncomeRoute: RecordIncomeRoute,
   ReportsRoute: ReportsRoute,
   ResetPasswordRoute: ResetPasswordRouteWithChildren,
