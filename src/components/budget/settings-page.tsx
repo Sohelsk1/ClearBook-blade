@@ -34,21 +34,13 @@ export function SettingsPage() {
         <CategoryBudgets />
       </div>
       <CalendarCard />
-      <section className="panel p-5">
+      <section className="panel p-4">
         <h3 className="text-lg font-medium">Appearance</h3>
-        <p className="mt-1 text-sm text-muted-foreground">Saved with this account.</p>
-        <div className="appearance-tiles">
+        <div className="mt-3 flex gap-2">
           {(["light", "dark"] as const).map((theme) => (
-            <button
-              key={theme}
-              type="button"
-              className={settings.theme === theme ? "appearance-tile is-on" : "appearance-tile"}
-              aria-pressed={settings.theme === theme}
-              onClick={() => patchSettings({ theme })}
-            >
-              <span className={theme === "dark" ? "appearance-swatch is-dark" : "appearance-swatch"} aria-hidden="true" />
-              <span>{theme === "light" ? "Light" : "Dark"}</span>
-            </button>
+            <Button key={theme} variant={settings.theme === theme ? "primary" : "secondary"} onClick={() => patchSettings({ theme })}>
+              {theme === "light" ? "Light" : "Dark"}
+            </Button>
           ))}
         </div>
       </section>
