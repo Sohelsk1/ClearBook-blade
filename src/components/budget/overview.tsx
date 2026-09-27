@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState, type ComponentType, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowDownLeft, ArrowUpRight, Landmark } from "lucide-react";
+import { StatementImport } from "@/components/budget/statement-import";
+import { SaverScoreCard } from "@/components/budget/saver-score-card";
 import { useEditor } from "@/components/budget/frame";
 import type { ChartSlice } from "@/components/budget/spend-chart";
 import {
@@ -218,6 +220,23 @@ export function Overview() {
         <h2 className="font-display text-3xl font-medium tracking-tight text-foreground">Your Money Overview</h2>
         <p className="mt-1 text-sm text-muted-foreground">A clearer picture of where your money goes.</p>
       </div>
+      <StatementImport />
+      <SaverScoreCard
+        transactions={transactions}
+        start={bounds.start}
+        end={bounds.end}
+        currency={currency}
+        hasStatement={transactions.some((tx) => tx.id.startsWith("stmt-idfc-"))}
+      />
+      <section className="panel mb-4 p-4">
+        <Link to="/loans" className="flex items-center justify-between gap-3">
+          <span>
+            <span className="block text-sm font-medium">Loans & Credit</span>
+            <span className="text-xs text-muted-foreground">Upload a CIBIL / TransUnion report and review your credit details</span>
+          </span>
+          <Landmark className="size-4 text-muted-foreground" aria-hidden="true" />
+        </Link>
+      </section>
       <div className="grid gap-4 lg:grid-cols-12">
         {settings.cardOrder.map((id) => (
           <div key={id} className="contents">
