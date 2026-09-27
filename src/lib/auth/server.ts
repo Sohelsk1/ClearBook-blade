@@ -107,6 +107,7 @@ const LOCAL_DEV_ORIGINS: string[] = [
 // must not pass signup, login, session refresh, password reset, or OAuth.
 const PUBLIC_APP_ORIGINS = [
   "https://clearbookdata.in",
+  "https://clear-book-blade.vercel.app",
   "https://blade-sage-zinc-ember.grok.me",
 ] as const;
 const publicAppHosts: string[] = PUBLIC_APP_ORIGINS.map((origin) => new URL(origin).hostname);
