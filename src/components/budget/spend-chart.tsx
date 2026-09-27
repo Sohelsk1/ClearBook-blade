@@ -4,7 +4,7 @@ import { formatCompactMoney, formatDay, formatMoney, type CurrencyCode, type Day
 
 export type ChartSlice = SpendSlice & { fill: string };
 
-const ACCENT = "#3B82F6";
+const ACCENT = "#6d8aa8";
 const CATEGORY_COLORS = ["#2563eb", "#f59e0b", "#22c55e", "#7c3aed", "#ec4899", "#06b6d4"];
 const AXIS = { fill: "#71717A", fontSize: 12, fontFamily: "JetBrains Mono, ui-monospace, monospace" };
 
@@ -167,7 +167,7 @@ export function DailySpendChart({ points, currency, onSelect }: DailyProps) {
               }}
             >
               {points.map((point, index) => (
-                <Cell key={point.date} fill={ACCENT} fillOpacity={hover === index ? 1 : 0.8} />
+                <Cell key={point.date} fill={ACCENT} fillOpacity={hover === index ? 0.92 : 0.62} />
               ))}
             </Bar>
           </BarChart>
